@@ -1,6 +1,7 @@
 pub fn aoc_day01(input: &str) -> u32 {
-    let mut count = input
+    input
         .chars()
+        .cycle()
         .skip(1)
         .zip(input.chars())
         .fold(0, |acc, (u, l)| {
@@ -9,14 +10,7 @@ pub fn aoc_day01(input: &str) -> u32 {
             } else {
                 acc
             }
-        });
-
-    // Don't forget to check last and first
-    if input.chars().nth(0).unwrap() == input.chars().last().unwrap() {
-        count += input.chars().nth(0).unwrap().to_digit(10).unwrap();
-    }
-
-    count
+        })
 }
 
 #[cfg(test)]
@@ -69,7 +63,6 @@ mod tests {
 
                 assert_eq!(expected, to_check);
             }
-
         }
     }
 }
