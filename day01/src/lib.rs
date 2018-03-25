@@ -60,6 +60,16 @@ mod tests {
 
                 assert_eq!(expected, to_check);
             }
+
+            #[test]
+            fn solution() {
+                const PUZZLE_INPUT: &'static str = include_str!("../day01_input.txt");
+                let expected = 1177;
+                let to_check = aoc_day01(PUZZLE_INPUT);
+
+                assert_eq!(expected, to_check);
+            }
+
         }
     }
 }
