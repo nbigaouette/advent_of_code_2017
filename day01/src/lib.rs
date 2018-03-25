@@ -1,11 +1,15 @@
 pub fn aoc_day01(input: &str) -> u32 {
-    let mut count = input.chars().skip(1).zip(input.chars()).fold(0, |acc, (u, l)| {
-        if u == l {
-            acc + l.to_digit(10).unwrap()
-        } else {
-            acc
-        }
-    });
+    let mut count = input
+        .chars()
+        .skip(1)
+        .zip(input.chars())
+        .fold(0, |acc, (u, l)| {
+            if u == l {
+                acc + l.to_digit(10).unwrap()
+            } else {
+                acc
+            }
+        });
 
     // Don't forget to check last and first
     if input.chars().nth(0).unwrap() == input.chars().last().unwrap() {
@@ -14,7 +18,6 @@ pub fn aoc_day01(input: &str) -> u32 {
 
     count
 }
-
 
 #[cfg(test)]
 mod tests {
