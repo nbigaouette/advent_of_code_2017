@@ -2,3 +2,7 @@
 name = "day01"
 version = "0.1.0"
 
+[[package]]
+name = "day01_part_two"
+version = "0.1.0"
+
