@@ -60,7 +60,7 @@ mod tests {
                 \      /
                     fwft - cntj
                         \
-                            xhth
+                          xhth
             */
             const EXAMPLE1: &str = "pbga (66)
                                     xhth (57)
