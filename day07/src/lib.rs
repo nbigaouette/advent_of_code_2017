@@ -2,6 +2,7 @@
 struct Program<'a> {
     name: &'a str,
     nb_disks: u32,
+    holding_on: Vec<&'a str>,
 }
 
 fn parse_input<'a>(input: &'a str) -> Vec<Program<'a>> {
@@ -17,9 +18,16 @@ fn parse_input<'a>(input: &'a str) -> Vec<Program<'a>> {
                 .trim_matches(')')
                 .parse()
                 .unwrap();
+            // Arrow
+            let holding_on = if let Some(_arrow) = word_iter.next() {
+                word_iter.map(|word| word.trim_matches(',')).collect()
+            } else {
+                Vec::new()
+            };
             Program {
                 name: program_name,
                 nb_disks: nb_disks,
+                holding_on: holding_on,
             }
         })
         .collect()
@@ -67,65 +75,81 @@ mod tests {
                                     ugml (68) -> gyxo, ebii, jptl
                                     gyxo (61)
                                     cntj (57)";
-            const EXAMPLE1_PROGRAMS: [Program; 13] = [
-                Program {
-                    name: "pbga",
-                    nb_disks: 66,
-                },
-                Program {
-                    name: "xhth",
-                    nb_disks: 57,
-                },
-                Program {
-                    name: "ebii",
-                    nb_disks: 61,
-                },
-                Program {
-                    name: "havc",
-                    nb_disks: 66,
-                },
-                Program {
-                    name: "ktlj",
-                    nb_disks: 57,
-                },
-                Program {
-                    name: "fwft",
-                    nb_disks: 72,
-                },
-                Program {
-                    name: "qoyq",
-                    nb_disks: 66,
-                },
-                Program {
-                    name: "padx",
-                    nb_disks: 45,
-                },
-                Program {
-                    name: "tknk",
-                    nb_disks: 41,
-                },
-                Program {
-                    name: "jptl",
-                    nb_disks: 61,
-                },
-                Program {
-                    name: "ugml",
-                    nb_disks: 68,
-                },
-                Program {
-                    name: "gyxo",
-                    nb_disks: 61,
-                },
-                Program {
-                    name: "cntj",
-                    nb_disks: 57,
-                },
-            ];
+            fn example1_program_build_vec<'a>() -> Vec<Program<'a>> {
+                vec![
+                    Program {
+                        name: "pbga",
+                        nb_disks: 66,
+                        holding_on: vec![],
+                    },
+                    Program {
+                        name: "xhth",
+                        nb_disks: 57,
+                        holding_on: vec![],
+                    },
+                    Program {
+                        name: "ebii",
+                        nb_disks: 61,
+                        holding_on: vec![],
+                    },
+                    Program {
+                        name: "havc",
+                        nb_disks: 66,
+                        holding_on: vec![],
+                    },
+                    Program {
+                        name: "ktlj",
+                        nb_disks: 57,
+                        holding_on: vec![],
+                    },
+                    Program {
+                        name: "fwft",
+                        nb_disks: 72,
+                        holding_on: vec!["ktlj", "cntj", "xhth"],
+                    },
+                    Program {
+                        name: "qoyq",
+                        nb_disks: 66,
+                        holding_on: vec![],
+                    },
+                    Program {
+                        name: "padx",
+                        nb_disks: 45,
+                        holding_on: vec!["pbga", "havc", "qoyq"],
+                    },
+                    Program {
+                        name: "tknk",
+                        nb_disks: 41,
+                        holding_on: vec!["ugml", "padx", "fwft"],
+                    },
+                    Program {
+                        name: "jptl",
+                        nb_disks: 61,
+                        holding_on: vec![],
+                    },
+                    Program {
+                        name: "ugml",
+                        nb_disks: 68,
+                        holding_on: vec!["gyxo", "ebii", "jptl"],
+                    },
+                    Program {
+                        name: "gyxo",
+                        nb_disks: 61,
+                        holding_on: vec![],
+                    },
+                    Program {
+                        name: "cntj",
+                        nb_disks: 57,
+                        holding_on: vec![],
+                    },
+                ]
+            }
 
             #[test]
             fn example_01_parse_input() {
                 let to_check = parse_input(EXAMPLE1);
-                assert_eq!(to_check, EXAMPLE1_PROGRAMS);
+                let expected = example1_program_build_vec();
+                assert_eq!(expected, to_check);
             }
 
             #[test]
