@@ -1,7 +1,7 @@
 #[derive(Debug, PartialEq)]
 struct Program<'a> {
     name: &'a str,
-    nb_disks: u32,
+    weight: u32,
     children: Vec<&'a str>,
 }
 
@@ -11,7 +11,7 @@ fn parse_input<'a>(input: &'a str) -> Vec<Program<'a>> {
         .map(|line| {
             let mut word_iter = line.split_whitespace();
             let program_name = word_iter.next().unwrap();
-            let nb_disks = word_iter
+            let weight = word_iter
                 .next()
                 .unwrap()
                 .trim_matches('(')
@@ -25,7 +25,7 @@ fn parse_input<'a>(input: &'a str) -> Vec<Program<'a>> {
             };
             Program {
                 name: program_name,
-                nb_disks: nb_disks,
+                weight: weight,
                 children: children,
             }
         })
@@ -78,67 +78,67 @@ mod tests {
                 vec![
                     Program {
                         name: "pbga",
-                        nb_disks: 66,
+                        weight: 66,
                         children: vec![],
                     },
                     Program {
                         name: "xhth",
-                        nb_disks: 57,
+                        weight: 57,
                         children: vec![],
                     },
                     Program {
                         name: "ebii",
-                        nb_disks: 61,
+                        weight: 61,
                         children: vec![],
                     },
                     Program {
                         name: "havc",
-                        nb_disks: 66,
+                        weight: 66,
                         children: vec![],
                     },
                     Program {
                         name: "ktlj",
-                        nb_disks: 57,
+                        weight: 57,
                         children: vec![],
                     },
                     Program {
                         name: "fwft",
-                        nb_disks: 72,
+                        weight: 72,
                         children: vec!["ktlj", "cntj", "xhth"],
                     },
                     Program {
                         name: "qoyq",
-                        nb_disks: 66,
+                        weight: 66,
                         children: vec![],
                     },
                     Program {
                         name: "padx",
-                        nb_disks: 45,
+                        weight: 45,
                         children: vec!["pbga", "havc", "qoyq"],
                     },
                     Program {
                         name: "tknk",
-                        nb_disks: 41,
+                        weight: 41,
                         children: vec!["ugml", "padx", "fwft"],
                     },
                     Program {
                         name: "jptl",
-                        nb_disks: 61,
+                        weight: 61,
                         children: vec![],
                     },
                     Program {
                         name: "ugml",
-                        nb_disks: 68,
+                        weight: 68,
                         children: vec!["gyxo", "ebii", "jptl"],
                     },
                     Program {
                         name: "gyxo",
-                        nb_disks: 61,
+                        weight: 61,
                         children: vec![],
                     },
                     Program {
                         name: "cntj",
-                        nb_disks: 57,
+                        weight: 57,
                         children: vec![],
                     },
                 ]
