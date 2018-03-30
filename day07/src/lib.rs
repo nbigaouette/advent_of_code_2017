@@ -10,7 +10,7 @@ fn parse_input<'a>(input: &'a str) -> Vec<Program<'a>> {
         .map(|line| {
             let mut word_iter = line.split_whitespace();
             let program_name = word_iter.next().unwrap();
-            let nb_disks: u32 = word_iter
+            let nb_disks = word_iter
                 .next()
                 .unwrap()
                 .trim_matches('(')
