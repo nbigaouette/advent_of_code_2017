@@ -1,4 +1,4 @@
-pub fn aoc_day02(input: &str) -> u32 {
+pub fn aoc_day02_part_1(input: &str) -> u32 {
     // For each row, determine the difference between the largest value and the smallest value;
     // the checksum is the sum of all of these differences.
 
@@ -26,16 +26,16 @@ pub fn aoc_day02(input: &str) -> u32 {
 #[cfg(test)]
 mod tests {
     mod aoc2017 {
-        mod day02 {
+        mod day02_part_1 {
             use ::*;
 
             #[test]
-            fn example_01_1122() {
+            fn example_01() {
                 let input = "5 1 9 5
                              7 5 3
                              2 4 6 8";
                 let expected = 18;
-                let to_check = aoc_day02(input);
+                let to_check = aoc_day02_part_1(input);
 
                 assert_eq!(expected, to_check);
             }
@@ -44,7 +44,7 @@ mod tests {
             fn solution() {
                 const PUZZLE_INPUT: &'static str = include_str!("../day02_input.txt");
                 let expected = 47623;
-                let to_check = aoc_day02(PUZZLE_INPUT);
+                let to_check = aoc_day02_part_1(PUZZLE_INPUT);
 
                 assert_eq!(expected, to_check);
             }
