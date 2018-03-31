@@ -178,6 +178,23 @@ mod tests {
             }
 
             #[test]
+            fn example_custom_02_corners() {
+                let n_corners = [3, 5, 7, 9];
+                let expected = 2;
+                for input in n_corners.iter() {
+                    let to_check = aoc_day03_part_1(*input);
+                    assert_eq!(expected, to_check);
+                }
+
+                let n_corners = [13, 17, 21, 25];
+                let expected = 4;
+                for input in n_corners.iter() {
+                    let to_check = aoc_day03_part_1(*input);
+                    assert_eq!(expected, to_check);
+                }
+            }
+
+            #[test]
             fn solution() {
                 let puzzle_input = 325489;
                 let expected = 552;
