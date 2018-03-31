@@ -1,8 +1,16 @@
+use std::collections::HashMap;
+
 #[derive(Debug, PartialEq)]
 struct Program<'a> {
     name: &'a str,
     weight: u32,
     children: Vec<&'a str>,
+}
+
+#[derive(Debug)]
+struct Node<'a> {
+    program: &'a Program<'a>,
+    children: Vec<Node<'a>>,
 }
 
 fn parse_input<'a>(input: &'a str) -> Vec<Program<'a>> {
@@ -32,8 +40,58 @@ fn parse_input<'a>(input: &'a str) -> Vec<Program<'a>> {
         .collect()
 }
 
-pub fn aoc_day07(input: &str) -> String {
-    unimplemented!()
+fn find_bottom_program<'a>(programs: &'a [Program<'a>]) -> Node<'a> {
+    // First, create nodes for all programs that don't have
+    // any children. Those are the leaf nodes.
+    // let mut trees: Vec<Node> = programs
+    let mut trees: HashMap<&'a str, Node> = programs
+        .iter()
+        .map(|program| {
+            (
+                program.name,
+                Node {
+                    program: &program,
+                    children: Vec::new(),
+                },
+            )
+        })
+        .collect();
+
+    // The `trees` now contains all programs but flat. Go over every one of them
+    // and remove their children from `trees`.
+    programs
+        .iter()
+        // Don't loop over programs without children
+        .filter(|parent_program| !parent_program.children.is_empty())
+        .for_each(|parent_program| {
+            // Find the children nodes and remove them from the `trees`.
+            parent_program
+                .children
+                .iter()
+                // Remove the child node from `trees`
+                .for_each(|child_name| { trees.remove(child_name).unwrap(); });
+        });
+
+    let (_root_name, root_node) = trees.into_iter().nth(0).unwrap();
+
+    root_node
+}
+
+pub fn aoc_day07<'a>(input: &'a str) -> &'a str {
+    let programs = parse_input(input);
+
+    let root_node = find_bottom_program(&programs);
+    // A member variable of `root_node` cannot be returned since it does
+    // not live long enough; `root_node` (and thus its member variables too)
+    // are part of the current stack frame and will disappear when the
+    // function returns.
+    // Instead, return the original string reference as found in `programs`.
+    // This saves an allocation, at the cost of having to find the proper name.
+    programs
+        .iter()
+        .find(|program| program.name == root_node.program.name)
+        .unwrap()
+        .name
 }
 
 #[cfg(test)]
@@ -161,11 +219,11 @@ mod tests {
 
             #[test]
             fn solution() {
-                // const PUZZLE_INPUT: &'static str = include_str!("../day07_input.txt");
-                // let expected = ???;
-                // let to_check = aoc_day07(PUZZLE_INPUT);
+                const PUZZLE_INPUT: &'static str = include_str!("../day07_input.txt");
+                let expected = "wiapj";
+                let to_check = aoc_day07(PUZZLE_INPUT);
 
-                // assert_eq!(expected, to_check);
+                assert_eq!(expected, to_check);
             }
         }
     }
