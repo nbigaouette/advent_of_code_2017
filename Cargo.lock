@@ -24,6 +24,10 @@ name = "day02"
 version = "0.1.0"
 
 [[package]]
+name = "day02-part-2"
+version = "0.1.0"
+
+[[package]]
 name = "day03"
 version = "0.1.0"
 
@@ -44,10 +48,6 @@ dependencies = [
 
 [[package]]
 name = "day07"
-version = "0.1.0"
-
-[[package]]
-name = "day02-part-2"
 version = "0.1.0"
 
 [metadata]
