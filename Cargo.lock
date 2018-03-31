@@ -28,7 +28,7 @@ name = "day02_part_1"
 version = "0.1.0"
 
 [[package]]
-name = "day03"
+name = "day03_part_1"
 version = "0.1.0"
 
 [[package]]
