@@ -1,6 +1,6 @@
 extern crate crc;
 
-use std::collections::HashSet;
+use std::collections::HashMap;
 
 fn distribute_once(banks: &mut [u32]) {
     // Find bank with maximum block
@@ -54,41 +54,50 @@ fn as_u8_slice<T>(v: &[T]) -> &[u8] {
     unsafe { std::slice::from_raw_parts(v.as_ptr() as *const u8, v.len() * element_size) }
 }
 
-fn reallocation(banks: &mut [u32]) -> u32 {
-    // A HashSet is used to detect if a banks configuration was already seen
+fn reallocation(banks: &mut [u32]) -> (u32, u32) {
+    // A HashMap is used to detect if a banks configuration was already seen
     // and stop the redistribution.
-    let mut banks_seen = HashSet::new();
+    let mut banks_seen = HashMap::new();
 
     let mut count = 0;
+    let mut first_seen_at = 0;
 
-    // Since the slice cannot be used as the key to the HashSet,
+    // Since the slice cannot be used as the key to the HashMap,
     // a CRC32 checksum of the slice is calculated instead and used
-    // as the HashSet key.
+    // as the HashMap key.
     // If the `replace()` method returns None, the
     // checksum was never seen and the looping thus continue.
     // NOTE: Since the crc function takes a `&[u8]`, the banks' `&[u32]` is
     //       converted using `as_u8_slice()`.
-    while let None = banks_seen.replace(crc::crc32::checksum_ieee(as_u8_slice(banks))) {
+    for i in 0.. {
+        let key = crc::crc32::checksum_ieee(as_u8_slice(banks));
+        let entry = banks_seen.entry(key).or_insert((i, 0));
+        (*entry).1 += 1;
+        if (*entry).1 > 1 {
+            first_seen_at = (*entry).0;
+            break;
+        }
         distribute_once(banks);
         count += 1;
     }
 
-    count
+    (count, first_seen_at)
 }
 
-pub fn aoc_day06(banks: &str) -> u32 {
+pub fn aoc_day06_part_2(banks: &str) -> (u32, u32, Vec<u32>) {
     let mut banks: Vec<u32> = banks
         .split_whitespace()
         .map(|n| n.parse().unwrap())
         .collect();
 
-    reallocation(&mut banks)
+    let (count, first_seen_at) = reallocation(&mut banks);
+    (count, count - first_seen_at, banks)
 }
 
 #[cfg(test)]
 mod tests {
     mod aoc2017 {
-        mod day06 {
+        mod day06_part_2 {
             use ::*;
 
             #[test]
@@ -137,21 +146,32 @@ mod tests {
             }
 
             #[test]
-            fn example_01_0270() {
+            fn example_01_2412() {
                 let input = "0	2	7	0";
-                let expected = 5;
-                let to_check = aoc_day06(&input);
+                let (expected_count, expected_first_seen_at, expected_banks) =
+                    (5, 4, &[2, 4, 1, 2]);
+                let (to_check_count, to_check_first_seen_at, to_check_vec) =
+                    aoc_day06_part_2(&input);
 
-                assert_eq!(expected, to_check);
+                assert_eq!(to_check_count, expected_count);
+                assert_eq!(to_check_first_seen_at, expected_first_seen_at);
+                assert_eq!(to_check_vec, expected_banks);
             }
 
             #[test]
             fn solution() {
-                const PUZZLE_INPUT: &'static str = include_str!("../day06_input.txt");
-                let expected = 6681;
-                let to_check = aoc_day06(PUZZLE_INPUT);
+                const PUZZLE_INPUT: &'static str = include_str!("../input.txt");
+                let (expected_count, expected_first_seen_at, expected_banks) = (
+                    6681,
+                    2392,
+                    &[0, 14, 13, 12, 11, 10, 8, 8, 6, 6, 5, 3, 3, 2, 1, 10],
+                );
+                let (to_check_count, to_check_first_seen_at, to_check_vec) =
+                    aoc_day06_part_2(PUZZLE_INPUT);
 
-                assert_eq!(expected, to_check);
+                assert_eq!(to_check_count, expected_count);
+                assert_eq!(to_check_first_seen_at, expected_first_seen_at);
+                assert_eq!(to_check_vec, expected_banks);
             }
         }
     }
