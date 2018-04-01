@@ -77,7 +77,7 @@ fn find_bottom_program<'a>(programs: &'a [Program<'a>]) -> Node<'a> {
     root_node
 }
 
-pub fn aoc_day07<'a>(input: &'a str) -> &'a str {
+pub fn aoc_day07_part_1<'a>(input: &'a str) -> &'a str {
     let programs = parse_input(input);
 
     let root_node = find_bottom_program(&programs);
@@ -132,7 +132,7 @@ mod tests {
                                     ugml (68) -> gyxo, ebii, jptl
                                     gyxo (61)
                                     cntj (57)";
-            fn example1_program_build_vec<'a>() -> Vec<Program<'a>> {
+            fn part_1_example1_program_build_vec<'a>() -> Vec<Program<'a>> {
                 vec![
                     Program {
                         name: "pbga",
@@ -203,25 +203,25 @@ mod tests {
             }
 
             #[test]
-            fn example_01_parse_input() {
+            fn part_1_example_01_parse_input() {
                 let to_check = parse_input(EXAMPLE1);
-                let expected = example1_program_build_vec();
+                let expected = part_1_example1_program_build_vec();
                 assert_eq!(expected, to_check);
             }
 
             #[test]
-            fn example_01() {
+            fn part_1_example_01() {
                 let expected = "tknk";
-                let to_check = aoc_day07(EXAMPLE1);
+                let to_check = aoc_day07_part_1(EXAMPLE1);
 
                 assert_eq!(expected, to_check);
             }
 
             #[test]
-            fn solution() {
+            fn part_1_solution() {
                 const PUZZLE_INPUT: &'static str = include_str!("../day07_input.txt");
                 let expected = "wiapj";
-                let to_check = aoc_day07(PUZZLE_INPUT);
+                let to_check = aoc_day07_part_1(PUZZLE_INPUT);
 
                 assert_eq!(expected, to_check);
             }
