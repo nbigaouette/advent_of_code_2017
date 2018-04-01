@@ -15,7 +15,7 @@ fn is_passphrase_valid(passphrase: &str) -> bool {
     max_count == 1
 }
 
-pub fn aoc_day04(passphrase_list: &str) -> u32 {
+pub fn aoc_day04_part_1(passphrase_list: &str) -> u32 {
     passphrase_list
         .lines()
         .map(|passphrase| is_passphrase_valid(passphrase))
@@ -25,7 +25,7 @@ pub fn aoc_day04(passphrase_list: &str) -> u32 {
 #[cfg(test)]
 mod tests {
     mod aoc2017 {
-        mod day04 {
+        mod day04_part_1 {
             use ::*;
 
             #[test]
@@ -57,9 +57,9 @@ mod tests {
 
             #[test]
             fn solution() {
-                const PUZZLE_INPUT: &'static str = include_str!("../day04_input.txt");
+                const PUZZLE_INPUT: &'static str = include_str!("../input.txt");
                 let expected = 383;
-                let to_check = aoc_day04(PUZZLE_INPUT);
+                let to_check = aoc_day04_part_1(PUZZLE_INPUT);
 
                 assert_eq!(expected, to_check);
             }
