@@ -76,7 +76,7 @@ fn reallocation(banks: &mut [u32]) -> u32 {
     count
 }
 
-pub fn aoc_day06(banks: &str) -> u32 {
+pub fn aoc_day06_part_1(banks: &str) -> u32 {
     let mut banks: Vec<u32> = banks
         .split_whitespace()
         .map(|n| n.parse().unwrap())
@@ -88,7 +88,7 @@ pub fn aoc_day06(banks: &str) -> u32 {
 #[cfg(test)]
 mod tests {
     mod aoc2017 {
-        mod day06 {
+        mod day06_part_1 {
             use ::*;
 
             #[test]
@@ -140,16 +140,16 @@ mod tests {
             fn example_01_0270() {
                 let input = "0	2	7	0";
                 let expected = 5;
-                let to_check = aoc_day06(&input);
+                let to_check = aoc_day06_part_1(&input);
 
                 assert_eq!(expected, to_check);
             }
 
             #[test]
             fn solution() {
-                const PUZZLE_INPUT: &'static str = include_str!("../day06_input.txt");
+                const PUZZLE_INPUT: &'static str = include_str!("../input.txt");
                 let expected = 6681;
-                let to_check = aoc_day06(PUZZLE_INPUT);
+                let to_check = aoc_day06_part_1(PUZZLE_INPUT);
 
                 assert_eq!(expected, to_check);
             }

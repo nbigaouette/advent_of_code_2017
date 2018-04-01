@@ -52,7 +52,7 @@ name = "day05_part_2"
 version = "0.1.0"
 
 [[package]]
-name = "day06"
+name = "day06_part_1"
 version = "0.1.0"
 dependencies = [
  "crc 1.7.0 (registry+https://github.com/rust-lang/crates.io-index)",
