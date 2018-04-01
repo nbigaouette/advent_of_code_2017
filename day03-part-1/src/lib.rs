@@ -14,7 +14,7 @@ fn spiral_side_id(n: i32, first_val: i32, width: i32) -> i32 {
     (n - first_val) / (width - 1)
 }
 
-pub fn aoc_day03(n: u32) -> u32 {
+pub fn aoc_day03_part_1(n: u32) -> u32 {
     if n == 1 {
         0
     } else {
@@ -136,7 +136,7 @@ mod tests {
             fn example_01_1() {
                 let input = 1;
                 let expected = 0;
-                let to_check = aoc_day03(input);
+                let to_check = aoc_day03_part_1(input);
 
                 assert_eq!(expected, to_check);
             }
@@ -145,7 +145,7 @@ mod tests {
             fn example_02_12() {
                 let input = 12;
                 let expected = 3;
-                let to_check = aoc_day03(input);
+                let to_check = aoc_day03_part_1(input);
 
                 assert_eq!(expected, to_check);
             }
@@ -154,7 +154,7 @@ mod tests {
             fn example_03_23() {
                 let input = 23;
                 let expected = 2;
-                let to_check = aoc_day03(input);
+                let to_check = aoc_day03_part_1(input);
 
                 assert_eq!(expected, to_check);
             }
@@ -163,7 +163,7 @@ mod tests {
             fn example_04_1024() {
                 let input = 1024;
                 let expected = 31;
-                let to_check = aoc_day03(input);
+                let to_check = aoc_day03_part_1(input);
 
                 assert_eq!(expected, to_check);
             }
@@ -172,16 +172,33 @@ mod tests {
             fn example_custom_01_39() {
                 let input = 39;
                 let expected = 4;
-                let to_check = aoc_day03(input);
+                let to_check = aoc_day03_part_1(input);
 
                 assert_eq!(expected, to_check);
+            }
+
+            #[test]
+            fn example_custom_02_corners() {
+                let n_corners = [3, 5, 7, 9];
+                let expected = 2;
+                for input in n_corners.iter() {
+                    let to_check = aoc_day03_part_1(*input);
+                    assert_eq!(expected, to_check);
+                }
+
+                let n_corners = [13, 17, 21, 25];
+                let expected = 4;
+                for input in n_corners.iter() {
+                    let to_check = aoc_day03_part_1(*input);
+                    assert_eq!(expected, to_check);
+                }
             }
 
             #[test]
             fn solution() {
                 let puzzle_input = 325489;
                 let expected = 552;
-                let to_check = aoc_day03(puzzle_input);
+                let to_check = aoc_day03_part_1(puzzle_input);
 
                 assert_eq!(expected, to_check);
             }
