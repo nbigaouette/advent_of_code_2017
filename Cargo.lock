@@ -59,6 +59,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "day06_part_2"
+version = "0.1.0"
+dependencies = [
+ "crc 1.7.0 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
 name = "day07"
 version = "0.1.0"
 
