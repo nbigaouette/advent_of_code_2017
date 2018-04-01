@@ -39,7 +39,7 @@ impl Iterator for Instructions {
     }
 }
 
-pub fn aoc_day05(instructions: &str) -> u32 {
+pub fn aoc_day05_part_1(instructions: &str) -> u32 {
     let instructions: Vec<i32> = instructions
         .lines()
         .map(|n| n.trim().parse().unwrap())
@@ -51,7 +51,7 @@ pub fn aoc_day05(instructions: &str) -> u32 {
 #[cfg(test)]
 mod tests {
     mod aoc2017 {
-        mod day05 {
+        mod day05_part_1 {
             use ::*;
 
             #[test]
@@ -111,16 +111,16 @@ mod tests {
                              1
                              -3";
                 let expected = 5;
-                let to_check = aoc_day05(&input);
+                let to_check = aoc_day05_part_1(&input);
 
                 assert_eq!(expected, to_check);
             }
 
             #[test]
             fn solution() {
-                const PUZZLE_INPUT: &'static str = include_str!("../day05_input.txt");
+                const PUZZLE_INPUT: &'static str = include_str!("../input.txt");
                 let expected = 358309;
-                let to_check = aoc_day05(PUZZLE_INPUT);
+                let to_check = aoc_day05_part_1(PUZZLE_INPUT);
 
                 assert_eq!(expected, to_check);
             }
