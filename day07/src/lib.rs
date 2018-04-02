@@ -20,6 +20,24 @@ struct Program<'a> {
 pub struct Node<'a> {
     program: Program<'a>,
     children: Vec<Node<'a>>,
+    total_weight: u32,
+}
+
+impl<'a> Node<'a> {
+    fn propagate_weights(&mut self) {
+        let children_weight: u32 = self.children
+            .iter_mut()
+            .map(|child| {
+                child.propagate_weights();
+                child.total_weight
+            })
+            .sum();
+        self.total_weight = self.program.weight + children_weight;
+
+        // Sort children. The unbalanced child, if any, will be at either end.
+        self.children
+            .sort_unstable_by(|a, b| a.total_weight.cmp(&b.total_weight));
+    }
 }
 
 pub fn build_tree<'a>(input: &'a str) -> Node<'a> {
@@ -78,7 +96,9 @@ pub fn build_tree<'a>(input: &'a str) -> Node<'a> {
     assert_eq!(1, orphan_nodes.len());
     assert!(unparsed_nodes.is_empty());
 
-    let (_root_name, root_node) = orphan_nodes.into_iter().nth(0).unwrap();
+    let (_root_name, mut root_node) = orphan_nodes.into_iter().nth(0).unwrap();
+
+    root_node.propagate_weights();
 
     root_node
 }
@@ -109,6 +129,7 @@ fn build_real_node<'a>(
             weight: node.weight,
         },
         children: child_nodes,
+        total_weight: 0,
     }
 }
 
