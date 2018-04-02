@@ -145,6 +145,8 @@ mod tests {
         mod day07 {
             use ::*;
 
+            const PUZZLE_INPUT: &'static str = include_str!("../input.txt");
+
             /*
                           gyxo
                         /
@@ -197,7 +199,6 @@ mod tests {
 
             #[test]
             fn part_1_solution() {
-                const PUZZLE_INPUT: &'static str = include_str!("../input.txt");
                 let expected = "wiapj";
                 let to_check = aoc_day07_part_1(PUZZLE_INPUT);
 
