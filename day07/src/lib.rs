@@ -133,10 +133,68 @@ fn build_real_node<'a>(
     }
 }
 
+fn find_unbalenced_child<'a>(node: &'a Node) -> (Option<&'a Node<'a>>, &'a Node<'a>) {
+    assert!(node.children.len() > 2);
+
+    let first_child = node.children.iter().nth(0).unwrap();
+    let last_child = node.children.iter().last().unwrap();
+    if first_child.total_weight == last_child.total_weight {
+        (None, node)
+    } else {
+        // Check which child (first or last) is unbalanced and recurse
+        let second_child = node.children.iter().nth(1).unwrap();
+        let (_current_node, unbalenced_child) =
+            if first_child.total_weight != second_child.total_weight {
+                find_unbalenced_child(first_child)
+            } else {
+                find_unbalenced_child(last_child)
+            };
+        (Some(node), unbalenced_child)
+    }
+}
+
 pub fn aoc_day07_part_1<'a>(input: &'a str) -> &'a str {
     let root_node = build_tree(input);
 
     root_node.program.name
+}
+
+pub fn aoc_day07_part_2(input: &str) -> i32 {
+    let root_node = build_tree(input);
+
+    // println!("root_node:\n{:#?}", root_node);
+
+    // Find the unbalanced node
+    // Find the deepest node for which children don't share the same weight
+    let (unbalanced_node, unbalenced_child) = find_unbalenced_child(&root_node);
+    let unbalanced_node = unbalanced_node.unwrap();
+
+    println!("unbalanced_node: {:?}", unbalanced_node.program.name);
+    println!("unbalenced_child: {:?}", unbalenced_child.program.name);
+
+    // Now find by how much the unbalanced child is
+    let diff = unbalanced_node
+        .children
+        .iter()
+        .filter(|child| child.program.name != unbalenced_child.program.name)
+        .nth(0)
+        .unwrap()
+        .total_weight as i32 - unbalenced_child.total_weight as i32;
+
+    println!("diff: {}", diff);
+    println!(
+        "unbalenced_child.program.weight as i32 + diff: {}",
+        unbalenced_child.program.weight as i32 + diff
+    );
+    println!("unbalenced_node:");
+    unbalanced_node.children.iter().for_each(|node| {
+        println!(
+            "    {:?} --> {} ({})",
+            node.program.name, node.program.weight, node.total_weight
+        )
+    });
+
+    unbalenced_child.program.weight as i32 + diff
 }
 
 #[cfg(test)]
@@ -194,6 +252,44 @@ mod tests {
                 let expected = "tknk";
                 let to_check = aoc_day07_part_1(EXAMPLE1);
 
+                assert_eq!(expected, to_check);
+            }
+
+            #[test]
+            fn part_2_example_01_propagate_weights() {
+                let root_node = build_tree(EXAMPLE1);
+
+                let expected_weight: HashMap<&str, u32> =
+                    [("ugml", 251), ("padx", 243), ("fwft", 243)]
+                        .iter()
+                        .cloned()
+                        .collect();
+
+                for child in root_node.children.iter() {
+                    let expected = *expected_weight.get(child.program.name).unwrap();
+                    let to_check = child.total_weight;
+                    assert_eq!(expected, to_check);
+                }
+            }
+
+            #[test]
+            fn part_2_example_01_find_unbalenced_child() {
+                let root_node = build_tree(EXAMPLE1);
+                let (unbalanced_node, unbalenced_child) = find_unbalenced_child(&root_node);
+
+                let to_check = unbalanced_node.unwrap().program.name;
+                let expected = "tknk";
+                assert_eq!(expected, to_check);
+
+                let to_check = unbalenced_child.program.name;
+                let expected = "ugml";
+                assert_eq!(expected, to_check);
+            }
+
+            #[test]
+            fn part_2_example_01() {
+                let to_check = aoc_day07_part_2(EXAMPLE1);
+                let expected = 60;
                 assert_eq!(expected, to_check);
             }
 
