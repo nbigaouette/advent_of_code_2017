@@ -1,20 +1,33 @@
+extern crate indexmap;
+
 use std::collections::HashMap;
 
-#[derive(Debug, PartialEq)]
-struct Program<'a> {
-    name: &'a str,
+use indexmap::IndexMap;
+
+#[derive(Clone, Debug)]
+struct TempNode<'a> {
     weight: u32,
     children: Vec<&'a str>,
 }
 
 #[derive(Debug)]
-struct Node<'a> {
-    program: &'a Program<'a>,
+struct Program<'a> {
+    name: &'a str,
+    weight: u32,
+}
+
+#[derive(Debug)]
+pub struct Node<'a> {
+    program: Program<'a>,
     children: Vec<Node<'a>>,
 }
 
-fn parse_input<'a>(input: &'a str) -> Vec<Program<'a>> {
-    input
+pub fn build_tree<'a>(input: &'a str) -> Node<'a> {
+    // Create a hash table of temporary tree nodes (`TempNode`) by parsing the input string.
+    // Use an `indexmap::IndexMap` instead of a `std::collections::HashMap` to bypass
+    // a borrowck issue: This hash table will be drained by iterating over it _and_
+    // when a node's child needs to be created.
+    let mut unparsed_nodes: IndexMap<&'a str, TempNode<'a>> = input
         .lines()
         .map(|line| {
             let mut word_iter = line.split_whitespace();
@@ -31,67 +44,78 @@ fn parse_input<'a>(input: &'a str) -> Vec<Program<'a>> {
             } else {
                 Vec::new()
             };
-            Program {
-                name: program_name,
-                weight: weight,
-                children: children,
-            }
-        })
-        .collect()
-}
-
-fn find_bottom_program<'a>(programs: &'a [Program<'a>]) -> Node<'a> {
-    // First, create nodes for all programs that don't have
-    // any children. Those are the leaf nodes.
-    // let mut trees: Vec<Node> = programs
-    let mut trees: HashMap<&'a str, Node> = programs
-        .iter()
-        .map(|program| {
             (
-                program.name,
-                Node {
-                    program: &program,
-                    children: Vec::new(),
+                program_name,
+                TempNode {
+                    weight: weight,
+                    children: children,
                 },
             )
         })
         .collect();
 
-    // The `trees` now contains all programs but flat. Go over every one of them
-    // and remove their children from `trees`.
-    programs
-        .iter()
-        // Don't loop over programs without children
-        .filter(|parent_program| !parent_program.children.is_empty())
-        .for_each(|parent_program| {
-            // Find the children nodes and remove them from the `trees`.
-            parent_program
-                .children
-                .iter()
-                // Remove the child node from `trees`
-                .for_each(|child_name| { trees.remove(child_name).unwrap(); });
-        });
+    // Orphan nodes are `Node`s without parents. The parent of a node might appear
+    // after its child in the input string.
+    let mut orphan_nodes: HashMap<&'a str, Node<'a>> = HashMap::new();
 
-    let (_root_name, root_node) = trees.into_iter().nth(0).unwrap();
+    while let Some((unparsed_node_name, unparsed_node)) = unparsed_nodes.pop() {
+        // Try to find an orphan node
+        let node_exists = orphan_nodes.contains_key(unparsed_node_name);
+        if !node_exists {
+            // Create a `Node` and insert it as orphan since its parent is unknown (yet)
+            let new_node = build_real_node(
+                unparsed_node_name,
+                unparsed_node,
+                &mut unparsed_nodes,
+                &mut orphan_nodes,
+            );
+
+            orphan_nodes.insert(unparsed_node_name, new_node);
+        }
+    }
+
+    // Only one node should be orphan: the tree's root node
+    assert_eq!(1, orphan_nodes.len());
+    assert!(unparsed_nodes.is_empty());
+
+    let (_root_name, root_node) = orphan_nodes.into_iter().nth(0).unwrap();
 
     root_node
 }
 
-pub fn aoc_day07_part_1<'a>(input: &'a str) -> &'a str {
-    let programs = parse_input(input);
-
-    let root_node = find_bottom_program(&programs);
-    // A member variable of `root_node` cannot be returned since it does
-    // not live long enough; `root_node` (and thus its member variables too)
-    // are part of the current stack frame and will disappear when the
-    // function returns.
-    // Instead, return the original string reference as found in `programs`.
-    // This saves an allocation, at the cost of having to find the proper name.
-    programs
+fn build_real_node<'a>(
+    name: &'a str,
+    node: TempNode<'a>,
+    unparsed_nodes: &mut IndexMap<&'a str, TempNode<'a>>,
+    orphan_nodes: &mut HashMap<&'a str, Node<'a>>,
+) -> Node<'a> {
+    let child_nodes = node.children
         .iter()
-        .find(|program| program.name == root_node.program.name)
-        .unwrap()
-        .name
+        .map(|child_name| {
+            // Remove the child `TempNode`s from the hashmap
+            // and build a new `Node` recursively.
+            // If `child_name` is not present in `unparsed_nodes` check `orphan_nodes` instead
+            if let Some(child_node) = unparsed_nodes.remove(child_name) {
+                build_real_node(child_name, child_node, unparsed_nodes, orphan_nodes)
+            } else {
+                orphan_nodes.remove(child_name).unwrap()
+            }
+        })
+        .collect();
+
+    Node {
+        program: Program {
+            name: name,
+            weight: node.weight,
+        },
+        children: child_nodes,
+    }
+}
+
+pub fn aoc_day07_part_1<'a>(input: &'a str) -> &'a str {
+    let root_node = build_tree(input);
+
+    root_node.program.name
 }
 
 #[cfg(test)]
@@ -132,80 +156,13 @@ mod tests {
                                     ugml (68) -> gyxo, ebii, jptl
                                     gyxo (61)
                                     cntj (57)";
-            fn part_1_example1_program_build_vec<'a>() -> Vec<Program<'a>> {
-                vec![
-                    Program {
-                        name: "pbga",
-                        weight: 66,
-                        children: vec![],
-                    },
-                    Program {
-                        name: "xhth",
-                        weight: 57,
-                        children: vec![],
-                    },
-                    Program {
-                        name: "ebii",
-                        weight: 61,
-                        children: vec![],
-                    },
-                    Program {
-                        name: "havc",
-                        weight: 66,
-                        children: vec![],
-                    },
-                    Program {
-                        name: "ktlj",
-                        weight: 57,
-                        children: vec![],
-                    },
-                    Program {
-                        name: "fwft",
-                        weight: 72,
-                        children: vec!["ktlj", "cntj", "xhth"],
-                    },
-                    Program {
-                        name: "qoyq",
-                        weight: 66,
-                        children: vec![],
-                    },
-                    Program {
-                        name: "padx",
-                        weight: 45,
-                        children: vec!["pbga", "havc", "qoyq"],
-                    },
-                    Program {
-                        name: "tknk",
-                        weight: 41,
-                        children: vec!["ugml", "padx", "fwft"],
-                    },
-                    Program {
-                        name: "jptl",
-                        weight: 61,
-                        children: vec![],
-                    },
-                    Program {
-                        name: "ugml",
-                        weight: 68,
-                        children: vec!["gyxo", "ebii", "jptl"],
-                    },
-                    Program {
-                        name: "gyxo",
-                        weight: 61,
-                        children: vec![],
-                    },
-                    Program {
-                        name: "cntj",
-                        weight: 57,
-                        children: vec![],
-                    },
-                ]
-            }
 
             #[test]
-            fn part_1_example_01_parse_input() {
-                let to_check = parse_input(EXAMPLE1);
-                let expected = part_1_example1_program_build_vec();
+            fn part_1_example_01_build_tree() {
+                let expected = "tknk";
+                let root_node = build_tree(EXAMPLE1);
+                let to_check = root_node.program.name;
+
                 assert_eq!(expected, to_check);
             }
 
