@@ -219,7 +219,7 @@ mod tests {
 
             #[test]
             fn part_1_solution() {
-                const PUZZLE_INPUT: &'static str = include_str!("../day07_input.txt");
+                const PUZZLE_INPUT: &'static str = include_str!("../input.txt");
                 let expected = "wiapj";
                 let to_check = aoc_day07_part_1(PUZZLE_INPUT);
 
