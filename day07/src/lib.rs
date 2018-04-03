@@ -147,13 +147,19 @@ fn build_real_node<'a>(
 fn find_unbalenced_child<'a>(parent_node: &'a Node) -> (Option<&'a Node<'a>>, &'a Node<'a>) {
     assert!(parent_node.children.len() > 2);
 
-    let first_child = parent_node.children.iter().nth(0).unwrap();
-    let last_child = parent_node.children.iter().last().unwrap();
+    let child_iter = parent_node.children.iter();
+
+    let first_child = child_iter.clone().nth(0).unwrap();
+    let last_child = child_iter.clone().last().unwrap();
+
+    // Children were sorted by weight when the tree was built
+    assert!(first_child.total_weight <= last_child.total_weight);
+
     if first_child.total_weight == last_child.total_weight {
         (None, parent_node)
     } else {
         // Check which child (first or last) is unbalanced and recurse
-        let second_child = parent_node.children.iter().nth(1).unwrap();
+        let second_child = child_iter.clone().nth(1).unwrap();
         let (_current_parent_node, unbalenced_child) =
             if first_child.total_weight != second_child.total_weight {
                 find_unbalenced_child(first_child)
