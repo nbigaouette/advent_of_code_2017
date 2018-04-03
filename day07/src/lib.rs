@@ -160,14 +160,14 @@ pub fn aoc_day07_part_2(input: &str) -> i32 {
 
     // Find the unbalanced node
     // Find the deepest node for which children don't share the same weight
-    let (unbalanced_node, unbalenced_child) = find_unbalenced_child(&root_node);
-    let unbalanced_node = unbalanced_node.unwrap();
+    let (unbalanced_parent, unbalenced_child) = find_unbalenced_child(&root_node);
+    let unbalanced_parent = unbalanced_parent.unwrap();
 
-    println!("unbalanced_node: {:?}", unbalanced_node.name);
+    println!("unbalanced_parent: {:?}", unbalanced_parent.name);
     println!("unbalenced_child: {:?}", unbalenced_child.name);
 
     // Now find by how much the unbalanced child is
-    let diff = unbalanced_node
+    let diff = unbalanced_parent
         .children
         .iter()
         .filter(|child| child.name != unbalenced_child.name)
@@ -180,8 +180,8 @@ pub fn aoc_day07_part_2(input: &str) -> i32 {
         "unbalenced_child.weight as i32 + diff: {}",
         unbalenced_child.weight as i32 + diff
     );
-    println!("unbalenced_node:");
-    unbalanced_node.children.iter().for_each(|node| {
+    println!("unbalanced_parent's children:");
+    unbalanced_parent.children.iter().for_each(|node| {
         println!(
             "    {:?} --> {} ({})",
             node.name, node.weight, node.total_weight
@@ -269,9 +269,9 @@ mod tests {
             #[test]
             fn part_2_example_01_find_unbalenced_child() {
                 let root_node = build_tree(EXAMPLE1);
-                let (unbalanced_node, unbalenced_child) = find_unbalenced_child(&root_node);
+                let (unbalanced_parent, unbalenced_child) = find_unbalenced_child(&root_node);
 
-                let to_check = unbalanced_node.unwrap().name;
+                let to_check = unbalanced_parent.unwrap().name;
                 let expected = "tknk";
                 assert_eq!(expected, to_check);
 
