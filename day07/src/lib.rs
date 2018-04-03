@@ -367,6 +367,15 @@ mod tests {
 
                 assert_eq!(expected, to_check);
             }
+
+            #[test]
+            fn part_2_solution() {
+                let expected = 1072;
+                let to_check = aoc_day07_part_2(PUZZLE_INPUT);
+
+                assert_eq!(expected, to_check);
+                assert!(to_check != 87851);
+            }
         }
     }
 }
