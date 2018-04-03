@@ -144,7 +144,7 @@ fn build_real_node<'a>(
     }
 }
 
-fn find_unbalenced_child<'a>(parent_node: &'a Node) -> (Option<&'a Node<'a>>, &'a Node<'a>) {
+fn find_first_unbalenced<'a>(parent_node: &'a Node) -> &'a Node<'a> {
     assert!(parent_node.children.len() > 2);
 
     let child_iter = parent_node.children.iter();
@@ -156,18 +156,28 @@ fn find_unbalenced_child<'a>(parent_node: &'a Node) -> (Option<&'a Node<'a>>, &'
     assert!(first_child.total_weight <= last_child.total_weight);
 
     if first_child.total_weight == last_child.total_weight {
-        (None, parent_node)
+        // End of recursion: Children all have the same total weight.
+        // The unbalanced node is thus the current one.
+        parent_node
     } else {
         // Check which child (first or last) is unbalanced and recurse
         let second_child = child_iter.clone().nth(1).unwrap();
-        let (_current_parent_node, unbalenced_child) =
-            if first_child.total_weight != second_child.total_weight {
-                find_unbalenced_child(first_child)
-            } else {
-                find_unbalenced_child(last_child)
-            };
-        (Some(parent_node), unbalenced_child)
+
+        if first_child.total_weight != second_child.total_weight {
+            find_first_unbalenced(first_child)
+        } else {
+            find_first_unbalenced(last_child)
+        }
     }
+}
+
+fn find_unbalenced_child<'a>(parent_node: &'a Node) -> (Option<&'a Node<'a>>, &'a Node<'a>) {
+    let unbalenced_child = find_first_unbalenced(parent_node);
+    // Since we don't store pointers to parent node, lets simply
+    // perform a lookup for the found node, which will return the parent node too.
+    let (unbalanced_parent, _unbalenced_child) =
+        parent_node.find_node(unbalenced_child.name).unwrap();
+    (unbalanced_parent, unbalenced_child)
 }
 
 pub fn aoc_day07_part_1<'a>(input: &'a str) -> &'a str {
