@@ -11,14 +11,10 @@ struct TempNode<'a> {
 }
 
 #[derive(Debug)]
-struct Program<'a> {
+pub struct Node<'a> {
     name: &'a str,
     weight: u32,
-}
 
-#[derive(Debug)]
-pub struct Node<'a> {
-    program: Program<'a>,
     children: Vec<Node<'a>>,
     total_weight: u32,
 }
@@ -32,7 +28,7 @@ impl<'a> Node<'a> {
                 child.total_weight
             })
             .sum();
-        self.total_weight = self.program.weight + children_weight;
+        self.total_weight = self.weight + children_weight;
 
         // Sort children. The unbalanced child, if any, will be at either end.
         self.children
@@ -124,10 +120,8 @@ fn build_real_node<'a>(
         .collect();
 
     Node {
-        program: Program {
-            name: name,
-            weight: node.weight,
-        },
+        name: name,
+        weight: node.weight,
         children: child_nodes,
         total_weight: 0,
     }
@@ -156,7 +150,7 @@ fn find_unbalenced_child<'a>(node: &'a Node) -> (Option<&'a Node<'a>>, &'a Node<
 pub fn aoc_day07_part_1<'a>(input: &'a str) -> &'a str {
     let root_node = build_tree(input);
 
-    root_node.program.name
+    root_node.name
 }
 
 pub fn aoc_day07_part_2(input: &str) -> i32 {
@@ -169,32 +163,32 @@ pub fn aoc_day07_part_2(input: &str) -> i32 {
     let (unbalanced_node, unbalenced_child) = find_unbalenced_child(&root_node);
     let unbalanced_node = unbalanced_node.unwrap();
 
-    println!("unbalanced_node: {:?}", unbalanced_node.program.name);
-    println!("unbalenced_child: {:?}", unbalenced_child.program.name);
+    println!("unbalanced_node: {:?}", unbalanced_node.name);
+    println!("unbalenced_child: {:?}", unbalenced_child.name);
 
     // Now find by how much the unbalanced child is
     let diff = unbalanced_node
         .children
         .iter()
-        .filter(|child| child.program.name != unbalenced_child.program.name)
+        .filter(|child| child.name != unbalenced_child.name)
         .nth(0)
         .unwrap()
         .total_weight as i32 - unbalenced_child.total_weight as i32;
 
     println!("diff: {}", diff);
     println!(
-        "unbalenced_child.program.weight as i32 + diff: {}",
-        unbalenced_child.program.weight as i32 + diff
+        "unbalenced_child.weight as i32 + diff: {}",
+        unbalenced_child.weight as i32 + diff
     );
     println!("unbalenced_node:");
     unbalanced_node.children.iter().for_each(|node| {
         println!(
             "    {:?} --> {} ({})",
-            node.program.name, node.program.weight, node.total_weight
+            node.name, node.weight, node.total_weight
         )
     });
 
-    unbalenced_child.program.weight as i32 + diff
+    unbalenced_child.weight as i32 + diff
 }
 
 #[cfg(test)]
@@ -242,7 +236,7 @@ mod tests {
             fn part_1_example_01_build_tree() {
                 let expected = "tknk";
                 let root_node = build_tree(EXAMPLE1);
-                let to_check = root_node.program.name;
+                let to_check = root_node.name;
 
                 assert_eq!(expected, to_check);
             }
@@ -266,7 +260,7 @@ mod tests {
                         .collect();
 
                 for child in root_node.children.iter() {
-                    let expected = *expected_weight.get(child.program.name).unwrap();
+                    let expected = *expected_weight.get(child.name).unwrap();
                     let to_check = child.total_weight;
                     assert_eq!(expected, to_check);
                 }
@@ -277,11 +271,11 @@ mod tests {
                 let root_node = build_tree(EXAMPLE1);
                 let (unbalanced_node, unbalenced_child) = find_unbalenced_child(&root_node);
 
-                let to_check = unbalanced_node.unwrap().program.name;
+                let to_check = unbalanced_node.unwrap().name;
                 let expected = "tknk";
                 assert_eq!(expected, to_check);
 
-                let to_check = unbalenced_child.program.name;
+                let to_check = unbalenced_child.name;
                 let expected = "ugml";
                 assert_eq!(expected, to_check);
             }
