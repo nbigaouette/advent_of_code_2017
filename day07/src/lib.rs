@@ -127,23 +127,23 @@ fn build_real_node<'a>(
     }
 }
 
-fn find_unbalenced_child<'a>(node: &'a Node) -> (Option<&'a Node<'a>>, &'a Node<'a>) {
-    assert!(node.children.len() > 2);
+fn find_unbalenced_child<'a>(parent_node: &'a Node) -> (Option<&'a Node<'a>>, &'a Node<'a>) {
+    assert!(parent_node.children.len() > 2);
 
-    let first_child = node.children.iter().nth(0).unwrap();
-    let last_child = node.children.iter().last().unwrap();
+    let first_child = parent_node.children.iter().nth(0).unwrap();
+    let last_child = parent_node.children.iter().last().unwrap();
     if first_child.total_weight == last_child.total_weight {
-        (None, node)
+        (None, parent_node)
     } else {
         // Check which child (first or last) is unbalanced and recurse
-        let second_child = node.children.iter().nth(1).unwrap();
-        let (_current_node, unbalenced_child) =
+        let second_child = parent_node.children.iter().nth(1).unwrap();
+        let (_current_parent_node, unbalenced_child) =
             if first_child.total_weight != second_child.total_weight {
                 find_unbalenced_child(first_child)
             } else {
                 find_unbalenced_child(last_child)
             };
-        (Some(node), unbalenced_child)
+        (Some(parent_node), unbalenced_child)
     }
 }
 
