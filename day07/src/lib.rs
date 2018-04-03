@@ -10,7 +10,7 @@ struct TempNode<'a> {
     children: Vec<&'a str>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct Node<'a> {
     name: &'a str,
     weight: u32,
@@ -33,6 +33,23 @@ impl<'a> Node<'a> {
         // Sort children. The unbalanced child, if any, will be at either end.
         self.children
             .sort_unstable_by(|a, b| a.total_weight.cmp(&b.total_weight));
+    }
+
+    #[allow(dead_code)]
+    fn find_node(&self, node_name: &str) -> Option<(Option<&Node<'a>>, &Node<'a>)> {
+        if self.name == node_name {
+            Some((None, &self))
+        } else {
+            for child in &self.children {
+                if let Some(mut found) = child.find_node(node_name) {
+                    if found.0.is_none() {
+                        found.0 = Some(&self);
+                    }
+                    return Some(found);
+                }
+            }
+            None
+        }
     }
 }
 
@@ -282,6 +299,63 @@ mod tests {
                 let to_check = unbalenced_child.total_weight;
                 let expected = 251;
                 assert_eq!(expected, to_check);
+            }
+
+            #[test]
+            fn part_2_example_01_find_node() {
+                let root_node = build_tree(EXAMPLE1);
+
+                let found = root_node.find_node("asjdaksdhakd");
+                assert!(found.is_none());
+
+                let (found_parent, tknk) = root_node.find_node("tknk").unwrap();
+                assert!(found_parent.is_none());
+                assert_eq!(tknk.name, "tknk");
+                assert_eq!(tknk.weight, 41);
+                assert_eq!(tknk.total_weight, 778);
+
+                let (found_parent, ugml) = root_node.find_node("ugml").unwrap();
+                assert_eq!(*found_parent.unwrap(), *tknk);
+                assert_eq!(ugml.name, "ugml");
+                assert_eq!(ugml.weight, 68);
+                assert_eq!(ugml.total_weight, 251);
+
+                let (found_parent, padx) = root_node.find_node("padx").unwrap();
+                assert_eq!(*found_parent.unwrap(), *tknk);
+                assert_eq!(padx.name, "padx");
+                assert_eq!(padx.weight, 45);
+                assert_eq!(padx.total_weight, 243);
+
+                let (found_parent, fwft) = root_node.find_node("fwft").unwrap();
+                assert_eq!(*found_parent.unwrap(), *tknk);
+                assert_eq!(fwft.name, "fwft");
+                assert_eq!(fwft.weight, 72);
+                assert_eq!(fwft.total_weight, 243);
+
+                // total weight of ugml:    ugml + (gyxo + ebii + jptl) = 68 + (61 + 61 + 61) = 251
+                for node_name in &["gyxo", "ebii", "jptl"] {
+                    let (found_parent, found_node) = root_node.find_node(node_name).unwrap();
+                    assert_eq!(*found_parent.unwrap(), *ugml);
+                    assert_eq!(found_node.name, *node_name);
+                    assert_eq!(found_node.weight, 61);
+                    assert_eq!(found_node.total_weight, 61);
+                }
+                // total weight of padx:    padx + (pbga + havc + qoyq) = 45 + (66 + 66 + 66) = 243
+                for node_name in &["pbga", "havc", "qoyq"] {
+                    let (found_parent, found_node) = root_node.find_node(node_name).unwrap();
+                    assert_eq!(*found_parent.unwrap(), *padx);
+                    assert_eq!(found_node.name, *node_name);
+                    assert_eq!(found_node.weight, 66);
+                    assert_eq!(found_node.total_weight, 66);
+                }
+                // total weight of fwft:    fwft + (ktlj + cntj + xhth) = 72 + (57 + 57 + 57) = 243
+                for node_name in &["ktlj", "cntj", "xhth"] {
+                    let (found_parent, found_node) = root_node.find_node(node_name).unwrap();
+                    assert_eq!(*found_parent.unwrap(), *fwft);
+                    assert_eq!(found_node.name, *node_name);
+                    assert_eq!(found_node.weight, 57);
+                    assert_eq!(found_node.total_weight, 57);
+                }
             }
 
             #[test]
