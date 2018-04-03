@@ -278,6 +278,10 @@ mod tests {
                 let to_check = unbalenced_child.name;
                 let expected = "ugml";
                 assert_eq!(expected, to_check);
+
+                let to_check = unbalenced_child.total_weight;
+                let expected = 251;
+                assert_eq!(expected, to_check);
             }
 
             #[test]
