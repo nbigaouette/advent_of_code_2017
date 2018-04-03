@@ -179,15 +179,10 @@ pub fn aoc_day07_part_1<'a>(input: &'a str) -> &'a str {
 pub fn aoc_day07_part_2(input: &str) -> i32 {
     let root_node = build_tree(input);
 
-    // println!("root_node:\n{:#?}", root_node);
-
     // Find the unbalanced node
     // Find the deepest node for which children don't share the same weight
     let (unbalanced_parent, unbalenced_child) = find_unbalenced_child(&root_node);
     let unbalanced_parent = unbalanced_parent.unwrap();
-
-    println!("unbalanced_parent: {:?}", unbalanced_parent.name);
-    println!("unbalenced_child: {:?}", unbalenced_child.name);
 
     // Now find by how much the unbalanced child is
     let diff = unbalanced_parent
@@ -197,19 +192,6 @@ pub fn aoc_day07_part_2(input: &str) -> i32 {
         .nth(0)
         .unwrap()
         .total_weight as i32 - unbalenced_child.total_weight as i32;
-
-    println!("diff: {}", diff);
-    println!(
-        "unbalenced_child.weight as i32 + diff: {}",
-        unbalenced_child.weight as i32 + diff
-    );
-    println!("unbalanced_parent's children:");
-    unbalanced_parent.children.iter().for_each(|node| {
-        println!(
-            "    {:?} --> {} ({})",
-            node.name, node.weight, node.total_weight
-        )
-    });
 
     unbalenced_child.weight as i32 + diff
 }
@@ -338,7 +320,6 @@ mod tests {
                 assert_eq!(fwft.weight, 72);
                 assert_eq!(fwft.total_weight, 243);
 
-                // total weight of ugml:    ugml + (gyxo + ebii + jptl) = 68 + (61 + 61 + 61) = 251
                 for node_name in &["gyxo", "ebii", "jptl"] {
                     let (found_parent, found_node) = root_node.find_node(node_name).unwrap();
                     assert_eq!(*found_parent.unwrap(), *ugml);
@@ -346,7 +327,6 @@ mod tests {
                     assert_eq!(found_node.weight, 61);
                     assert_eq!(found_node.total_weight, 61);
                 }
-                // total weight of padx:    padx + (pbga + havc + qoyq) = 45 + (66 + 66 + 66) = 243
                 for node_name in &["pbga", "havc", "qoyq"] {
                     let (found_parent, found_node) = root_node.find_node(node_name).unwrap();
                     assert_eq!(*found_parent.unwrap(), *padx);
@@ -354,7 +334,6 @@ mod tests {
                     assert_eq!(found_node.weight, 66);
                     assert_eq!(found_node.total_weight, 66);
                 }
-                // total weight of fwft:    fwft + (ktlj + cntj + xhth) = 72 + (57 + 57 + 57) = 243
                 for node_name in &["ktlj", "cntj", "xhth"] {
                     let (found_parent, found_node) = root_node.find_node(node_name).unwrap();
                     assert_eq!(*found_parent.unwrap(), *fwft);
