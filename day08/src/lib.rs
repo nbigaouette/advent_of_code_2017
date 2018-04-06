@@ -30,19 +30,19 @@ enum ComparisonOperator {
 
 #[derive(Debug)]
 struct Operations<'a> {
-    operations: std::str::Lines<'a>,
+    operations: std::iter::Peekable<std::str::Lines<'a>>,
     registers: Registers<'a>,
 }
 
 impl<'a> Operations<'a> {
     fn new(operations: &'a str) -> Operations {
         Operations {
-            operations: operations.lines(),
+            operations: operations.lines().peekable(),
             registers: Default::default(),
         }
     }
 
-    fn parse_next_line(&mut self) {
+    fn parse_next_line(&mut self) -> bool {
         self.operations.next().map(|line| {
             let operation = Operation::from(line);
 
@@ -81,6 +81,8 @@ impl<'a> Operations<'a> {
                 }
             }
         });
+        // Is there still some line(s) in `operations`?
+        self.operations.peek().is_some()
     }
 
     fn largest_value(&self) -> i32 {
@@ -208,23 +210,27 @@ mod tests {
             fn test_operations() {
                 let mut operations = Operations::new(EXAMPLE_01_INPUT);
 
-                operations.parse_next_line();
+                let is_not_done = operations.parse_next_line();
+                assert!(is_not_done);
                 assert_eq!(0, operations.registers.0.get("a").unwrap().value);
                 assert!(operations.registers.0.get("b").is_none());
                 assert_eq!(0, operations.largest_value());
 
-                operations.parse_next_line();
+                let is_not_done = operations.parse_next_line();
+                assert!(is_not_done);
                 assert_eq!(1, operations.registers.0.get("a").unwrap().value);
                 assert_eq!(0, operations.registers.0.get("b").unwrap().value);
                 assert_eq!(1, operations.largest_value());
 
-                operations.parse_next_line();
+                let is_not_done = operations.parse_next_line();
+                assert!(is_not_done);
                 assert_eq!(1, operations.registers.0.get("a").unwrap().value);
                 assert_eq!(0, operations.registers.0.get("b").unwrap().value);
                 assert_eq!(10, operations.registers.0.get("c").unwrap().value);
                 assert_eq!(10, operations.largest_value());
 
-                operations.parse_next_line();
+                let is_not_done = operations.parse_next_line();
+                assert!(!is_not_done);
                 assert_eq!(1, operations.registers.0.get("a").unwrap().value);
                 assert_eq!(0, operations.registers.0.get("b").unwrap().value);
                 assert_eq!(-10, operations.registers.0.get("c").unwrap().value);
