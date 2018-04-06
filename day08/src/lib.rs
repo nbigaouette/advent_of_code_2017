@@ -32,6 +32,7 @@ enum ComparisonOperator {
 struct Operations<'a> {
     operations: std::iter::Peekable<std::str::Lines<'a>>,
     registers: Registers<'a>,
+    highest_value: i32,
 }
 
 impl<'a> Operations<'a> {
@@ -39,6 +40,7 @@ impl<'a> Operations<'a> {
         Operations {
             operations: operations.lines().peekable(),
             registers: Default::default(),
+            highest_value: i32::min_value(),
         }
     }
 
@@ -79,6 +81,7 @@ impl<'a> Operations<'a> {
                     RegisterOperator::Add => target_register.value += operation.value_change,
                     RegisterOperator::Sub => target_register.value -= operation.value_change,
                 }
+                self.highest_value = self.highest_value.max(target_register.value);
             }
         });
         // Is there still some line(s) in `operations`?
@@ -149,12 +152,12 @@ impl<'a> From<&'a str> for Operation<'a> {
     }
 }
 
-pub fn aoc_day08(instructions: &str) -> i32 {
+pub fn aoc_day08(instructions: &str) -> (i32, i32) {
     let mut operations = Operations::new(instructions);
 
     while operations.parse_next_line() {}
 
-    operations.largest_value()
+    (operations.largest_value(), operations.highest_value)
 }
 
 #[cfg(test)]
@@ -244,7 +247,15 @@ mod tests {
             #[test]
             fn part_1_example_01() {
                 let expected = 1;
-                let to_check = aoc_day08(EXAMPLE_01_INPUT);
+                let (to_check, _) = aoc_day08(EXAMPLE_01_INPUT);
+
+                assert_eq!(expected, to_check);
+            }
+
+            #[test]
+            fn part_2_example_01() {
+                let expected = 10;
+                let (_, to_check) = aoc_day08(EXAMPLE_01_INPUT);
 
                 assert_eq!(expected, to_check);
             }
@@ -252,7 +263,15 @@ mod tests {
             #[test]
             fn part_1_solution() {
                 let expected = 2971;
-                let to_check = aoc_day08(PUZZLE_INPUT);
+                let (to_check, _) = aoc_day08(PUZZLE_INPUT);
+
+                assert_eq!(expected, to_check);
+            }
+
+            #[test]
+            fn part_2_solution() {
+                let expected = 4254;
+                let (_, to_check) = aoc_day08(PUZZLE_INPUT);
 
                 assert_eq!(expected, to_check);
             }
