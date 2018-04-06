@@ -9,12 +9,6 @@ struct Register {
     value: i32,
 }
 
-impl Register {
-    fn new() -> Register {
-        Default::default()
-    }
-}
-
 #[derive(Debug, Default)]
 struct Registers<'a>(HashMap<&'a str, Register>);
 
@@ -117,10 +111,6 @@ if                              # Condition (begining)          if
 ").unwrap();
 }
 
-fn parse_regex_line<'a>(line: &'a str) -> regex::Captures<'a> {
-    RE.captures(line).unwrap()
-}
-
 #[derive(Debug)]
 struct Operation<'a> {
     register_name: &'a str,
@@ -156,13 +146,6 @@ impl<'a> From<&'a str> for Operation<'a> {
         }
     }
 }
-
-// fn parse_input(input: &str) {
-//     input.lines().map(|line| {
-//         //
-//         parse_regex_line(line)
-//     });
-// }
 
 pub fn aoc_day08(instructions: &str) -> u32 {
     unimplemented!()
@@ -224,32 +207,27 @@ mod tests {
             #[test]
             fn test_operations() {
                 let mut operations = Operations::new(EXAMPLE_01_INPUT);
-                println!("0. operations.registers: {:?}", operations.registers);
 
                 operations.parse_next_line();
                 assert_eq!(0, operations.registers.0.get("a").unwrap().value);
                 assert!(operations.registers.0.get("b").is_none());
-                println!("1. operations.registers: {:?}", operations.registers);
                 assert_eq!(0, operations.largest_value());
 
                 operations.parse_next_line();
                 assert_eq!(1, operations.registers.0.get("a").unwrap().value);
                 assert_eq!(0, operations.registers.0.get("b").unwrap().value);
-                println!("2. operations.registers: {:?}", operations.registers);
                 assert_eq!(1, operations.largest_value());
 
                 operations.parse_next_line();
                 assert_eq!(1, operations.registers.0.get("a").unwrap().value);
                 assert_eq!(0, operations.registers.0.get("b").unwrap().value);
                 assert_eq!(10, operations.registers.0.get("c").unwrap().value);
-                println!("2. operations.registers: {:?}", operations.registers);
                 assert_eq!(10, operations.largest_value());
 
                 operations.parse_next_line();
                 assert_eq!(1, operations.registers.0.get("a").unwrap().value);
                 assert_eq!(0, operations.registers.0.get("b").unwrap().value);
                 assert_eq!(-10, operations.registers.0.get("c").unwrap().value);
-                println!("2. operations.registers: {:?}", operations.registers);
                 assert_eq!(1, operations.largest_value());
             }
 
