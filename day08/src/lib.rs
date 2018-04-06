@@ -16,7 +16,7 @@ impl Register {
 }
 
 #[derive(Debug, Default)]
-struct Registers(HashMap<String, Register>);
+struct Registers<'a>(HashMap<&'a str, Register>);
 
 #[derive(Debug, PartialEq, Clone)]
 enum RegisterOperator {
@@ -37,7 +37,7 @@ enum ComparisonOperator {
 #[derive(Debug)]
 struct Operations<'a> {
     operations: std::str::Lines<'a>,
-    registers: Registers,
+    registers: Registers<'a>,
 }
 
 impl<'a> Operations<'a> {
@@ -122,27 +122,27 @@ fn parse_regex_line<'a>(line: &'a str) -> regex::Captures<'a> {
 }
 
 #[derive(Debug)]
-struct Operation {
-    register_name: String,
+struct Operation<'a> {
+    register_name: &'a str,
     operation: RegisterOperator,
     value_change: i32,
-    condition_register: String,
+    condition_register: &'a str,
     condition_operator: ComparisonOperator,
     condition_value: i32,
 }
 
-impl<'a> From<&'a str> for Operation {
+impl<'a> From<&'a str> for Operation<'a> {
     fn from(line: &'a str) -> Self {
         let caps = RE.captures(line).unwrap();
         Operation {
-            register_name: caps["register_name"].to_string(),
+            register_name: caps.name("register_name").unwrap().as_str(),
             operation: match &caps["operation"] {
                 "inc" => RegisterOperator::Add,
                 "dec" => RegisterOperator::Sub,
                 _ => unreachable!(),
             },
             value_change: caps["op_value"].parse().unwrap(),
-            condition_register: caps["cond_reg_name"].to_string(),
+            condition_register: caps.name("cond_reg_name").unwrap().as_str(),
             condition_operator: match &caps["cond_operator"] {
                 "<" => ComparisonOperator::LessThan,
                 ">" => ComparisonOperator::GreaterThan,
