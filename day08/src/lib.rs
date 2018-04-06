@@ -149,8 +149,12 @@ impl<'a> From<&'a str> for Operation<'a> {
     }
 }
 
-pub fn aoc_day08(instructions: &str) -> u32 {
-    unimplemented!()
+pub fn aoc_day08(instructions: &str) -> i32 {
+    let mut operations = Operations::new(instructions);
+
+    while operations.parse_next_line() {}
+
+    operations.largest_value()
 }
 
 #[cfg(test)]
@@ -159,7 +163,7 @@ mod tests {
         mod day08 {
             use ::*;
 
-            // const PUZZLE_INPUT: &'static str = include_str!("../input.txt");
+            const PUZZLE_INPUT: &'static str = include_str!("../input.txt");
             const EXAMPLE_01_INPUT: &str = "b inc 5 if a > 1
                                             a inc 1 if b < 5
                                             c dec -10 if a >= 1
@@ -237,28 +241,20 @@ mod tests {
                 assert_eq!(1, operations.largest_value());
             }
 
-            // #[test]
-            // fn parse() {
-            //     let mut operations = Operations::new(EXAMPLE_01_INPUT);
-            //     operations.parse_next_line();
-            //     // let reg: Register = Default::default();
-            //     // println!("reg: {:#?}", reg);
-            //     // parse_input(EXAMPLE_01_INPUT);
-            // }
+            #[test]
+            fn part_1_example_01() {
+                let expected = 1;
+                let to_check = aoc_day08(EXAMPLE_01_INPUT);
+
+                assert_eq!(expected, to_check);
+            }
 
             #[test]
-            fn example_01_steps() {}
+            fn part_1_solution() {
+                let expected = 2971;
+                let to_check = aoc_day08(PUZZLE_INPUT);
 
-            #[test]
-            fn example_01() {}
-
-            #[test]
-            fn solution() {
-                // let expected = ???;
-                // let input = ???;
-                // let to_check = aoc_day08(PUZZLE_INPUT);
-
-                // assert_eq!(expected, to_check);
+                assert_eq!(expected, to_check);
             }
         }
     }
