@@ -49,52 +49,44 @@ impl<'a> Operations<'a> {
     }
 
     fn parse_next_line(&mut self) {
-        self.operations
-            .next()
-            .map(|line| parse_regex_line(line))
-            .into_iter()
-            .for_each(|caps| {
-                let operation = Operation::from(caps);
+        self.operations.next().map(|line| {
+            let operation = Operation::from(line);
 
-                let condition = {
-                    // Perform test on register value
-                    let cond_register = self.registers
-                        .0
-                        .entry(operation.condition_register)
-                        .or_insert(Default::default());
+            let condition = {
+                // Perform test on register value
+                let cond_register = self.registers
+                    .0
+                    .entry(operation.condition_register)
+                    .or_insert(Default::default());
 
-                    match operation.condition_operator {
-                        ComparisonOperator::LessThan => {
-                            cond_register.value < operation.condition_value
-                        }
-                        ComparisonOperator::GreaterThan => {
-                            cond_register.value > operation.condition_value
-                        }
-                        ComparisonOperator::Equal => {
-                            cond_register.value == operation.condition_value
-                        }
-                        ComparisonOperator::NotEqual => {
-                            cond_register.value != operation.condition_value
-                        }
-                        ComparisonOperator::LessThanOrEqual => {
-                            cond_register.value <= operation.condition_value
-                        }
-                        ComparisonOperator::GreaterThanOrEqual => {
-                            cond_register.value >= operation.condition_value
-                        }
+                match operation.condition_operator {
+                    ComparisonOperator::LessThan => cond_register.value < operation.condition_value,
+                    ComparisonOperator::GreaterThan => {
+                        cond_register.value > operation.condition_value
                     }
-                };
-                if condition {
-                    let target_register = self.registers
-                        .0
-                        .entry(operation.register_name)
-                        .or_insert(Default::default());
-                    match operation.operation {
-                        RegisterOperator::Add => target_register.value += operation.value_change,
-                        RegisterOperator::Sub => target_register.value -= operation.value_change,
+                    ComparisonOperator::Equal => cond_register.value == operation.condition_value,
+                    ComparisonOperator::NotEqual => {
+                        cond_register.value != operation.condition_value
+                    }
+                    ComparisonOperator::LessThanOrEqual => {
+                        cond_register.value <= operation.condition_value
+                    }
+                    ComparisonOperator::GreaterThanOrEqual => {
+                        cond_register.value >= operation.condition_value
                     }
                 }
-            });
+            };
+            if condition {
+                let target_register = self.registers
+                    .0
+                    .entry(operation.register_name)
+                    .or_insert(Default::default());
+                match operation.operation {
+                    RegisterOperator::Add => target_register.value += operation.value_change,
+                    RegisterOperator::Sub => target_register.value -= operation.value_change,
+                }
+            }
+        });
     }
 
     fn largest_value(&self) -> i32 {
@@ -139,8 +131,9 @@ struct Operation {
     condition_value: i32,
 }
 
-impl<'a> From<regex::Captures<'a>> for Operation {
-    fn from(caps: regex::Captures) -> Self {
+impl<'a> From<&'a str> for Operation {
+    fn from(line: &'a str) -> Self {
+        let caps = RE.captures(line).unwrap();
         Operation {
             register_name: caps["register_name"].to_string(),
             operation: match &caps["operation"] {
@@ -188,44 +181,8 @@ mod tests {
                                             c inc -20 if c == 10";
 
             #[test]
-            fn test_parse_regex_line() {
-                let caps = parse_regex_line("b inc 5 if a > 1");
-                assert_eq!("b", &caps["register_name"]);
-                assert_eq!("inc", &caps["operation"]);
-                assert_eq!("5", &caps["op_value"]);
-                assert_eq!("a", &caps["cond_reg_name"]);
-                assert_eq!(">", &caps["cond_operator"]);
-                assert_eq!("1", &caps["cond_value"]);
-
-                let caps = parse_regex_line("a inc 1 if b < 5");
-                assert_eq!("a", &caps["register_name"]);
-                assert_eq!("inc", &caps["operation"]);
-                assert_eq!("1", &caps["op_value"]);
-                assert_eq!("b", &caps["cond_reg_name"]);
-                assert_eq!("<", &caps["cond_operator"]);
-                assert_eq!("5", &caps["cond_value"]);
-
-                let caps = parse_regex_line("c dec -10 if a >= 1");
-                assert_eq!("c", &caps["register_name"]);
-                assert_eq!("dec", &caps["operation"]);
-                assert_eq!("-10", &caps["op_value"]);
-                assert_eq!("a", &caps["cond_reg_name"]);
-                assert_eq!(">=", &caps["cond_operator"]);
-                assert_eq!("1", &caps["cond_value"]);
-
-                let caps = parse_regex_line("c inc -20 if c == 10");
-                assert_eq!("c", &caps["register_name"]);
-                assert_eq!("inc", &caps["operation"]);
-                assert_eq!("-20", &caps["op_value"]);
-                assert_eq!("c", &caps["cond_reg_name"]);
-                assert_eq!("==", &caps["cond_operator"]);
-                assert_eq!("10", &caps["cond_value"]);
-            }
-
-            #[test]
             fn test_operation_from_regex_captures() {
-                let caps = parse_regex_line("b inc 5 if a > 1");
-                let operation = Operation::from(caps);
+                let operation = Operation::from("b inc 5 if a > 1");
                 assert_eq!("b", operation.register_name);
                 assert_eq!(RegisterOperator::Add, operation.operation);
                 assert_eq!(5, operation.value_change);
@@ -236,8 +193,7 @@ mod tests {
                 );
                 assert_eq!(1, operation.condition_value);
 
-                let caps = parse_regex_line("a inc 1 if b < 5");
-                let operation = Operation::from(caps);
+                let operation = Operation::from("a inc 1 if b < 5");
                 assert_eq!("a", operation.register_name);
                 assert_eq!(RegisterOperator::Add, operation.operation);
                 assert_eq!(1, operation.value_change);
@@ -245,8 +201,7 @@ mod tests {
                 assert_eq!(ComparisonOperator::LessThan, operation.condition_operator);
                 assert_eq!(5, operation.condition_value);
 
-                let caps = parse_regex_line("c dec -10 if a >= 1");
-                let operation = Operation::from(caps);
+                let operation = Operation::from("c dec -10 if a >= 1");
                 assert_eq!("c", operation.register_name);
                 assert_eq!(RegisterOperator::Sub, operation.operation);
                 assert_eq!(-10, operation.value_change);
@@ -257,8 +212,7 @@ mod tests {
                 );
                 assert_eq!(1, operation.condition_value);
 
-                let caps = parse_regex_line("c inc -20 if c == 10");
-                let operation = Operation::from(caps);
+                let operation = Operation::from("c inc -20 if c == 10");
                 assert_eq!("c", operation.register_name);
                 assert_eq!(RegisterOperator::Add, operation.operation);
                 assert_eq!(-20, operation.value_change);
