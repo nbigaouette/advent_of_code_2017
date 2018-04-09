@@ -141,12 +141,34 @@ fn puzzle_steps(puzzle: PuzzleStep1, lengths: &[usize]) -> PuzzleStep1 {
     }
 }
 
-pub fn aoc_day10_slice(lengths: &[usize], list_size: usize) -> usize {
-    let puzzle = Puzzle::from_list_size(list_size);
+fn create_and_advance_puzzle(lengths: &[usize], list_size: usize, nb_run: usize) -> PuzzleStep1 {
+    let mut puzzle = Puzzle::from_list_size(list_size);
 
-    let puzzle = puzzle_steps(puzzle, lengths);
+    for _i in 0..nb_run {
+        puzzle = puzzle_steps(puzzle, lengths);
+    }
 
+    puzzle
+}
+
+pub fn aoc_day10_slice(lengths: &[usize], list_size: usize, nb_run: usize) -> usize {
+    let puzzle = create_and_advance_puzzle(lengths, list_size, nb_run);
     (puzzle.state.list[0] as usize) * (puzzle.state.list[1] as usize)
+}
+
+pub fn aoc_day10_part_2(input: &str, input_list_size: usize) -> String {
+    let mut lengths: Vec<usize> = input.trim().chars().map(|v| v as usize).collect();
+
+    lengths.extend([17, 31, 73, 47, 23].iter());
+
+    let nb_run = 64;
+    let puzzle = create_and_advance_puzzle(lengths.as_slice(), input_list_size, nb_run);
+
+    puzzle.state.list
+        .chunks(16)
+        .map(|chunk| chunk.iter().fold(0, |acc, v| acc ^ v))  // dense_hash
+        .map(|v| format!("{:02x}", v))
+        .collect()
 }
 
 pub fn aoc_day10(input: &str, input_list_size: usize) -> usize {
@@ -155,7 +177,8 @@ pub fn aoc_day10(input: &str, input_list_size: usize) -> usize {
         .split(',')
         .map(|v| v.parse().unwrap())
         .collect();
-    aoc_day10_slice(lengths.as_slice(), input_list_size)
+    let nb_run = 1;
+    aoc_day10_slice(lengths.as_slice(), input_list_size, nb_run)
 }
 
 #[cfg(test)]
@@ -276,7 +299,8 @@ mod tests {
                 let expected = 12;
                 let input = [3, 4, 1, 5];
                 let input_list_size = 5;
-                let to_check = aoc_day10_slice(&input, input_list_size);
+                let nb_run = 1;
+                let to_check = aoc_day10_slice(&input, input_list_size, nb_run);
 
                 assert_eq!(expected, to_check);
             }
@@ -292,10 +316,59 @@ mod tests {
             }
 
             #[test]
+            fn part_2_example_01_empty_string() {
+                let expected = "a2582a3a0e66e6e86e3812dcb672a272";
+                let input = "";
+                let input_list_size = 256;
+                let to_check = aoc_day10_part_2(input, input_list_size);
+
+                assert_eq!(expected, to_check);
+            }
+
+            #[test]
+            fn part_2_example_02_aoc_2017() {
+                let expected = "33efeb34ea91902bb2f59c9920caa6cd";
+                let input = "AoC 2017";
+                let input_list_size = 256;
+                let to_check = aoc_day10_part_2(input, input_list_size);
+
+                assert_eq!(expected, to_check);
+            }
+
+            #[test]
+            fn part_2_example_03_123() {
+                let expected = "3efbe78a8d82f29979031a4aa0b16a9d";
+                let input = "1,2,3";
+                let input_list_size = 256;
+                let to_check = aoc_day10_part_2(input, input_list_size);
+
+                assert_eq!(expected, to_check);
+            }
+
+            #[test]
+            fn part_2_example_04_124() {
+                let expected = "63960835bcdc130f0b66d7ff4f6a5a8e";
+                let input = "1,2,4";
+                let input_list_size = 256;
+                let to_check = aoc_day10_part_2(input, input_list_size);
+
+                assert_eq!(expected, to_check);
+            }
+
+            #[test]
             fn part_1_solution() {
                 let expected = 826;
                 let input_list_size = 256;
                 let to_check = aoc_day10(PUZZLE_INPUT, input_list_size);
+
+                assert_eq!(expected, to_check);
+            }
+
+            #[test]
+            fn part_2_solution() {
+                let expected = "d067d3f14d07e09c2e7308c3926605c4";
+                let input_list_size = 256;
+                let to_check = aoc_day10_part_2(PUZZLE_INPUT, input_list_size);
 
                 assert_eq!(expected, to_check);
             }
