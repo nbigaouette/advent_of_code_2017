@@ -61,7 +61,7 @@ mod tests {
             use ::*;
 
             #[test]
-            fn example_01_1122() {
+            fn part_1_example_01_1122() {
                 let input = "1122";
                 let expected = 3;
                 let to_check = aoc_day01(input);
@@ -70,7 +70,7 @@ mod tests {
             }
 
             #[test]
-            fn example_02_1111() {
+            fn part_1_example_02_1111() {
                 let input = "1111";
                 let expected = 4;
                 let to_check = aoc_day01(input);
@@ -79,7 +79,7 @@ mod tests {
             }
 
             #[test]
-            fn example_03_1234() {
+            fn part_1_example_03_1234() {
                 let input = "1234";
                 let expected = 0;
                 let to_check = aoc_day01(input);
@@ -88,7 +88,7 @@ mod tests {
             }
 
             #[test]
-            fn example_04_91212129() {
+            fn part_1_example_04_91212129() {
                 let input = "91212129";
                 let expected = 9;
                 let to_check = aoc_day01(input);
@@ -97,7 +97,7 @@ mod tests {
             }
 
             #[test]
-            fn solution() {
+            fn part_1_solution() {
                 const PUZZLE_INPUT: &'static str = include_str!("../day01_input.txt");
                 let expected = 1177;
                 let to_check = aoc_day01(PUZZLE_INPUT);
