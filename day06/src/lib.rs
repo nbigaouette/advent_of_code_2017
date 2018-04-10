@@ -117,94 +117,183 @@ fn reallocation(banks: &mut [u32]) -> (u32, u32) {
     (count, first_seen_at)
 }
 
-pub fn aoc_day06_part_2(banks: &str) -> (u32, u32, Vec<u32>) {
+pub fn aoc_day06_generic(banks: &str) -> (u32, u32, Vec<u32>) {
     let mut banks: Vec<u32> = banks
         .split_whitespace()
         .map(|n| n.parse().unwrap())
         .collect();
 
     let (count, first_seen_at) = reallocation(&mut banks);
-    (count, count - first_seen_at, banks)
+    (count, first_seen_at, banks)
+}
+
+pub mod part_1 {
+    use super::aoc_day06_generic;
+
+    pub fn aoc_day06(banks: &str) -> u32 {
+        let (count, _first_seen_at, _banks) = aoc_day06_generic(banks);
+        count
+    }
+}
+
+pub mod part_2 {
+    use super::aoc_day06_generic;
+
+    pub fn aoc_day06(banks: &str) -> (u32, u32, Vec<u32>) {
+        let (count, first_seen_at, banks) = aoc_day06_generic(banks);
+        (count, count - first_seen_at, banks)
+    }
 }
 
 #[cfg(test)]
 mod tests {
     mod aoc2017 {
-        mod day06_part_2 {
-            use ::*;
+        mod day06 {
+            const PUZZLE_INPUT: &'static str = include_str!("../input");
 
-            #[test]
-            fn example_01_step1_0270() {
-                let mut banks = [0, 2, 7, 0];
-                let expected = [2, 4, 1, 2];
-                distribute_once(&mut banks);
+            mod part_1 {
+                use ::*;
+                use super::PUZZLE_INPUT;
 
-                assert_eq!(expected, banks);
+                #[test]
+                fn example_01_step1_0270() {
+                    let mut banks = [0, 2, 7, 0];
+                    let expected = [2, 4, 1, 2];
+                    distribute_once(&mut banks);
+
+                    assert_eq!(expected, banks);
+                }
+
+                #[test]
+                fn example_01_step2_2412() {
+                    let mut banks = [2, 4, 1, 2];
+                    let expected = [3, 1, 2, 3];
+                    distribute_once(&mut banks);
+
+                    assert_eq!(expected, banks);
+                }
+
+                #[test]
+                fn example_01_step3_3123() {
+                    let mut banks = [3, 1, 2, 3];
+                    let expected = [0, 2, 3, 4];
+                    distribute_once(&mut banks);
+
+                    assert_eq!(expected, banks);
+                }
+
+                #[test]
+                fn example_01_step4_0234() {
+                    let mut banks = [0, 2, 3, 4];
+                    let expected = [1, 3, 4, 1];
+                    distribute_once(&mut banks);
+
+                    assert_eq!(expected, banks);
+                }
+
+                #[test]
+                fn example_01_step5_1341() {
+                    let mut banks = [1, 3, 4, 1];
+                    let expected = [2, 4, 1, 2];
+                    distribute_once(&mut banks);
+
+                    assert_eq!(expected, banks);
+                }
+
+                #[test]
+                fn example_01_0270() {
+                    let input = "0	2	7	0";
+                    let expected = 5;
+                    let to_check = part_1::aoc_day06(&input);
+
+                    assert_eq!(expected, to_check);
+                }
+
+                #[test]
+                fn solution() {
+                    let expected = 6681;
+                    let to_check = part_1::aoc_day06(PUZZLE_INPUT);
+
+                    assert_eq!(expected, to_check);
+                }
             }
 
-            #[test]
-            fn example_01_step2_2412() {
-                let mut banks = [2, 4, 1, 2];
-                let expected = [3, 1, 2, 3];
-                distribute_once(&mut banks);
+            mod part_2 {
+                use ::*;
+                use super::PUZZLE_INPUT;
 
-                assert_eq!(expected, banks);
-            }
+                #[test]
+                fn example_01_step1_0270() {
+                    let mut banks = [0, 2, 7, 0];
+                    let expected = [2, 4, 1, 2];
+                    distribute_once(&mut banks);
 
-            #[test]
-            fn example_01_step3_3123() {
-                let mut banks = [3, 1, 2, 3];
-                let expected = [0, 2, 3, 4];
-                distribute_once(&mut banks);
+                    assert_eq!(expected, banks);
+                }
 
-                assert_eq!(expected, banks);
-            }
+                #[test]
+                fn example_01_step2_2412() {
+                    let mut banks = [2, 4, 1, 2];
+                    let expected = [3, 1, 2, 3];
+                    distribute_once(&mut banks);
 
-            #[test]
-            fn example_01_step4_0234() {
-                let mut banks = [0, 2, 3, 4];
-                let expected = [1, 3, 4, 1];
-                distribute_once(&mut banks);
+                    assert_eq!(expected, banks);
+                }
 
-                assert_eq!(expected, banks);
-            }
+                #[test]
+                fn example_01_step3_3123() {
+                    let mut banks = [3, 1, 2, 3];
+                    let expected = [0, 2, 3, 4];
+                    distribute_once(&mut banks);
 
-            #[test]
-            fn example_01_step5_1341() {
-                let mut banks = [1, 3, 4, 1];
-                let expected = [2, 4, 1, 2];
-                distribute_once(&mut banks);
+                    assert_eq!(expected, banks);
+                }
 
-                assert_eq!(expected, banks);
-            }
+                #[test]
+                fn example_01_step4_0234() {
+                    let mut banks = [0, 2, 3, 4];
+                    let expected = [1, 3, 4, 1];
+                    distribute_once(&mut banks);
 
-            #[test]
-            fn example_01_2412() {
-                let input = "0	2	7	0";
-                let (expected_count, expected_first_seen_at, expected_banks) =
-                    (5, 4, &[2, 4, 1, 2]);
-                let (to_check_count, to_check_first_seen_at, to_check_vec) =
-                    aoc_day06_part_2(&input);
+                    assert_eq!(expected, banks);
+                }
 
-                assert_eq!(to_check_count, expected_count);
-                assert_eq!(to_check_first_seen_at, expected_first_seen_at);
-                assert_eq!(to_check_vec, expected_banks);
-            }
+                #[test]
+                fn example_01_step5_1341() {
+                    let mut banks = [1, 3, 4, 1];
+                    let expected = [2, 4, 1, 2];
+                    distribute_once(&mut banks);
 
-            #[test]
-            fn solution() {
-                const PUZZLE_INPUT: &'static str = include_str!("../input.txt");
-                let (expected_count, expected_first_seen_at, expected_banks) = (
-                    6681,
-                    2392,
-                    &[0, 14, 13, 12, 11, 10, 8, 8, 6, 6, 5, 3, 3, 2, 1, 10],
-                );
-                let (to_check_count, to_check_first_seen_at, to_check_vec) =
-                    aoc_day06_part_2(PUZZLE_INPUT);
+                    assert_eq!(expected, banks);
+                }
 
-                assert_eq!(to_check_count, expected_count);
-                assert_eq!(to_check_first_seen_at, expected_first_seen_at);
-                assert_eq!(to_check_vec, expected_banks);
+                #[test]
+                fn example_01_2412() {
+                    let input = "0	2	7	0";
+                    let (expected_count, expected_first_seen_at, expected_banks) =
+                        (5, 4, &[2, 4, 1, 2]);
+                    let (to_check_count, to_check_first_seen_at, to_check_vec) =
+                        part_2::aoc_day06(&input);
+
+                    assert_eq!(to_check_count, expected_count);
+                    assert_eq!(to_check_first_seen_at, expected_first_seen_at);
+                    assert_eq!(to_check_vec, expected_banks);
+                }
+
+                #[test]
+                fn solution() {
+                    let (expected_count, expected_first_seen_at, expected_banks) = (
+                        6681,
+                        2392,
+                        &[0, 14, 13, 12, 11, 10, 8, 8, 6, 6, 5, 3, 3, 2, 1, 10],
+                    );
+                    let (to_check_count, to_check_first_seen_at, to_check_vec) =
+                        part_2::aoc_day06(PUZZLE_INPUT);
+
+                    assert_eq!(to_check_count, expected_count);
+                    assert_eq!(to_check_first_seen_at, expected_first_seen_at);
+                    assert_eq!(to_check_vec, expected_banks);
+                }
             }
         }
     }
