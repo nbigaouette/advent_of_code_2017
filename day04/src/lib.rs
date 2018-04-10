@@ -30,7 +30,22 @@
 
 use std::collections::HashMap;
 
-fn is_passphrase_valid(passphrase: &str) -> bool {
+fn is_passphrase_valid_part_1(passphrase: &str) -> bool {
+    let mut passphrase_word_count = HashMap::new();
+
+    passphrase.split_whitespace().for_each(|word| {
+        let word_count = passphrase_word_count.entry(word).or_insert(0);
+        *word_count += 1;
+    });
+
+    let max_count = passphrase_word_count
+        .iter()
+        .fold(0, |max_count, (_word, count)| max_count.max(*count));
+
+    max_count == 1
+}
+
+fn is_passphrase_valid_part_2(passphrase: &str) -> bool {
     let mut passphrase_word_count = HashMap::new();
 
     passphrase.split_whitespace().for_each(|word| {
@@ -48,67 +63,110 @@ fn is_passphrase_valid(passphrase: &str) -> bool {
     max_count == 1
 }
 
+pub fn aoc_day04_part_1(passphrase_list: &str) -> u32 {
+    passphrase_list
+        .lines()
+        .map(|passphrase| is_passphrase_valid_part_1(passphrase))
+        .fold(0, |acc, is_valid| if is_valid { acc + 1 } else { acc })
+}
+
 pub fn aoc_day04_part_2(passphrase_list: &str) -> u32 {
     passphrase_list
         .lines()
-        .map(|passphrase| is_passphrase_valid(passphrase))
+        .map(|passphrase| is_passphrase_valid_part_2(passphrase))
         .fold(0, |acc, is_valid| if is_valid { acc + 1 } else { acc })
 }
 
 #[cfg(test)]
 mod tests {
     mod aoc2017 {
-        mod day04_part_2 {
+        mod day04 {
             use ::*;
 
+            const PUZZLE_INPUT: &'static str = include_str!("../input");
+
             #[test]
-            fn example_01_abcde_fghij() {
+            fn part_1_example_01_aa_bb_cc_dd_ee() {
+                let input = "aa bb cc dd ee";
+                let expected = true;
+                let to_check = is_passphrase_valid_part_1(input);
+
+                assert_eq!(expected, to_check);
+            }
+
+            #[test]
+            fn part_1_example_02_aa_bb_cc_dd_aa() {
+                let input = "aa bb cc dd aa";
+                let expected = false;
+                let to_check = is_passphrase_valid_part_1(input);
+
+                assert_eq!(expected, to_check);
+            }
+
+            #[test]
+            fn part_1_example_03_aa_bb_cc_dd_aaa() {
+                let input = "aa bb cc dd aaa";
+                let expected = true;
+                let to_check = is_passphrase_valid_part_1(input);
+
+                assert_eq!(expected, to_check);
+            }
+
+            #[test]
+            fn part_2_example_01_abcde_fghij() {
                 let input = "abcde fghij";
                 let expected = true;
-                let to_check = is_passphrase_valid(input);
+                let to_check = is_passphrase_valid_part_2(input);
 
                 assert_eq!(expected, to_check);
             }
 
             #[test]
-            fn example_02_abcde_xyz_ecdaba() {
+            fn part_2_example_02_abcde_xyz_ecdaba() {
                 let input = "abcde xyz ecdab";
                 let expected = false;
-                let to_check = is_passphrase_valid(input);
+                let to_check = is_passphrase_valid_part_2(input);
 
                 assert_eq!(expected, to_check);
             }
 
             #[test]
-            fn example_03_a_ab_abc_abd_abf_abj() {
+            fn part_2_example_03_a_ab_abc_abd_abf_abj() {
                 let input = "a ab abc abd abf abj";
                 let expected = true;
-                let to_check = is_passphrase_valid(input);
+                let to_check = is_passphrase_valid_part_2(input);
 
                 assert_eq!(expected, to_check);
             }
 
             #[test]
-            fn example_04_iiii_oiii_ooii_oooi_oooo() {
+            fn part_2_example_04_iiii_oiii_ooii_oooi_oooo() {
                 let input = "iiii oiii ooii oooi oooo";
                 let expected = true;
-                let to_check = is_passphrase_valid(input);
+                let to_check = is_passphrase_valid_part_2(input);
 
                 assert_eq!(expected, to_check);
             }
 
             #[test]
-            fn example_05_oiii_ioii_iioi_iiio() {
+            fn part_2_example_05_oiii_ioii_iioi_iiio() {
                 let input = "oiii ioii iioi iiio";
                 let expected = false;
-                let to_check = is_passphrase_valid(input);
+                let to_check = is_passphrase_valid_part_2(input);
 
                 assert_eq!(expected, to_check);
             }
 
             #[test]
-            fn solution() {
-                const PUZZLE_INPUT: &'static str = include_str!("../input.txt");
+            fn part_1_solution() {
+                let expected = 383;
+                let to_check = aoc_day04_part_1(PUZZLE_INPUT);
+
+                assert_eq!(expected, to_check);
+            }
+
+            #[test]
+            fn part_2_solution() {
                 let expected = 265;
                 let to_check = aoc_day04_part_2(PUZZLE_INPUT);
 

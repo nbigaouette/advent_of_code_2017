@@ -32,11 +32,7 @@ name = "day03"
 version = "0.1.0"
 
 [[package]]
-name = "day04-part-1"
-version = "0.1.0"
-
-[[package]]
-name = "day04-part-2"
+name = "day04"
 version = "0.1.0"
 
 [[package]]
