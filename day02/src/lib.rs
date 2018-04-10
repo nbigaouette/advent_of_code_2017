@@ -95,7 +95,7 @@ pub fn aoc_day02_part_2(input: &str) -> u32 {
 #[cfg(test)]
 mod tests {
     mod aoc2017 {
-        mod day02_part_1 {
+        mod day02 {
             use ::*;
 
             #[test]
