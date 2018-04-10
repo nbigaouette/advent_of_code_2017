@@ -235,221 +235,237 @@ pub fn aoc_day10_slice(lengths: &[usize], list_size: usize, nb_run: usize) -> us
     (puzzle.state.list[0] as usize) * (puzzle.state.list[1] as usize)
 }
 
-pub fn aoc_day10_part_2(input: &str, input_list_size: usize) -> String {
-    let mut lengths: Vec<usize> = input.trim().chars().map(|v| v as usize).collect();
+pub mod part_1 {
+    use super::aoc_day10_slice;
 
-    lengths.extend([17, 31, 73, 47, 23].iter());
-
-    let nb_run = 64;
-    let puzzle = create_and_advance_puzzle(lengths.as_slice(), input_list_size, nb_run);
-
-    puzzle.state.list
-        .chunks(16)
-        .map(|chunk| chunk.iter().fold(0, |acc, v| acc ^ v))  // dense_hash
-        .map(|v| format!("{:02x}", v))
-        .collect()
+    pub fn aoc_day10(input: &str, input_list_size: usize) -> usize {
+        let lengths: Vec<usize> = input
+            .trim()
+            .split(',')
+            .map(|v| v.parse().unwrap())
+            .collect();
+        let nb_run = 1;
+        aoc_day10_slice(lengths.as_slice(), input_list_size, nb_run)
+    }
 }
 
-pub fn aoc_day10(input: &str, input_list_size: usize) -> usize {
-    let lengths: Vec<usize> = input
-        .trim()
-        .split(',')
-        .map(|v| v.parse().unwrap())
-        .collect();
-    let nb_run = 1;
-    aoc_day10_slice(lengths.as_slice(), input_list_size, nb_run)
+pub mod part_2 {
+    use super::create_and_advance_puzzle;
+
+    pub fn aoc_day10(input: &str, input_list_size: usize) -> String {
+        let mut lengths: Vec<usize> = input.trim().chars().map(|v| v as usize).collect();
+
+        lengths.extend([17, 31, 73, 47, 23].iter());
+
+        let nb_run = 64;
+        let puzzle = create_and_advance_puzzle(lengths.as_slice(), input_list_size, nb_run);
+
+        puzzle.state.list
+            .chunks(16)
+            .map(|chunk| chunk.iter().fold(0, |acc, v| acc ^ v))  // dense_hash
+            .map(|v| format!("{:02x}", v))
+            .collect()
+    }
 }
 
 #[cfg(test)]
 mod tests {
     mod aoc2017 {
         mod day10 {
-            use ::*;
-
             const PUZZLE_INPUT: &'static str = include_str!("../input");
 
-            #[test]
-            fn part_1_example_01_steps_manual() {
-                let puzzle = Puzzle::from_list_size(5);
+            mod part_1 {
+                use ::*;
+                use super::PUZZLE_INPUT;
 
-                // Initial conditions
-                assert_eq!([0, 1, 2, 3, 4], puzzle.state.list.as_slice());
-                assert_eq!(0, puzzle.state.current_position);
-                assert_eq!(0, puzzle.state.skip_size);
+                #[test]
+                fn example_01_steps_manual() {
+                    let puzzle = Puzzle::from_list_size(5);
 
-                // First length
-                let puzzle = puzzle.reverse(3);
-                assert_eq!([2, 1, 0, 3, 4], puzzle.state.list.as_slice());
-                assert_eq!(0, puzzle.state.current_position);
-                assert_eq!(0, puzzle.state.skip_size);
+                    // Initial conditions
+                    assert_eq!([0, 1, 2, 3, 4], puzzle.state.list.as_slice());
+                    assert_eq!(0, puzzle.state.current_position);
+                    assert_eq!(0, puzzle.state.skip_size);
 
-                let puzzle = puzzle.move_current_position();
-                assert_eq!([2, 1, 0, 3, 4], puzzle.state.list.as_slice());
-                assert_eq!(3, puzzle.state.current_position);
-                assert_eq!(0, puzzle.state.skip_size);
+                    // First length
+                    let puzzle = puzzle.reverse(3);
+                    assert_eq!([2, 1, 0, 3, 4], puzzle.state.list.as_slice());
+                    assert_eq!(0, puzzle.state.current_position);
+                    assert_eq!(0, puzzle.state.skip_size);
 
-                let puzzle = puzzle.increase();
-                assert_eq!([2, 1, 0, 3, 4], puzzle.state.list.as_slice());
-                assert_eq!(3, puzzle.state.current_position);
-                assert_eq!(1, puzzle.state.skip_size);
+                    let puzzle = puzzle.move_current_position();
+                    assert_eq!([2, 1, 0, 3, 4], puzzle.state.list.as_slice());
+                    assert_eq!(3, puzzle.state.current_position);
+                    assert_eq!(0, puzzle.state.skip_size);
 
-                // Second length
-                let puzzle = puzzle.reverse(4);
-                assert_eq!([4, 3, 0, 1, 2], puzzle.state.list.as_slice());
-                assert_eq!(3, puzzle.state.current_position);
-                assert_eq!(1, puzzle.state.skip_size);
+                    let puzzle = puzzle.increase();
+                    assert_eq!([2, 1, 0, 3, 4], puzzle.state.list.as_slice());
+                    assert_eq!(3, puzzle.state.current_position);
+                    assert_eq!(1, puzzle.state.skip_size);
 
-                let puzzle = puzzle.move_current_position();
-                assert_eq!([4, 3, 0, 1, 2], puzzle.state.list.as_slice());
-                assert_eq!(3, puzzle.state.current_position);
-                assert_eq!(1, puzzle.state.skip_size);
+                    // Second length
+                    let puzzle = puzzle.reverse(4);
+                    assert_eq!([4, 3, 0, 1, 2], puzzle.state.list.as_slice());
+                    assert_eq!(3, puzzle.state.current_position);
+                    assert_eq!(1, puzzle.state.skip_size);
 
-                let puzzle = puzzle.increase();
-                assert_eq!([4, 3, 0, 1, 2], puzzle.state.list.as_slice());
-                assert_eq!(3, puzzle.state.current_position);
-                assert_eq!(2, puzzle.state.skip_size);
+                    let puzzle = puzzle.move_current_position();
+                    assert_eq!([4, 3, 0, 1, 2], puzzle.state.list.as_slice());
+                    assert_eq!(3, puzzle.state.current_position);
+                    assert_eq!(1, puzzle.state.skip_size);
 
-                // Third length
-                let puzzle = puzzle.reverse(1);
-                assert_eq!([4, 3, 0, 1, 2], puzzle.state.list.as_slice());
-                assert_eq!(3, puzzle.state.current_position);
-                assert_eq!(2, puzzle.state.skip_size);
+                    let puzzle = puzzle.increase();
+                    assert_eq!([4, 3, 0, 1, 2], puzzle.state.list.as_slice());
+                    assert_eq!(3, puzzle.state.current_position);
+                    assert_eq!(2, puzzle.state.skip_size);
 
-                let puzzle = puzzle.move_current_position();
-                assert_eq!([4, 3, 0, 1, 2], puzzle.state.list.as_slice());
-                assert_eq!(1, puzzle.state.current_position);
-                assert_eq!(2, puzzle.state.skip_size);
+                    // Third length
+                    let puzzle = puzzle.reverse(1);
+                    assert_eq!([4, 3, 0, 1, 2], puzzle.state.list.as_slice());
+                    assert_eq!(3, puzzle.state.current_position);
+                    assert_eq!(2, puzzle.state.skip_size);
 
-                let puzzle = puzzle.increase();
-                assert_eq!([4, 3, 0, 1, 2], puzzle.state.list.as_slice());
-                assert_eq!(1, puzzle.state.current_position);
-                assert_eq!(3, puzzle.state.skip_size);
+                    let puzzle = puzzle.move_current_position();
+                    assert_eq!([4, 3, 0, 1, 2], puzzle.state.list.as_slice());
+                    assert_eq!(1, puzzle.state.current_position);
+                    assert_eq!(2, puzzle.state.skip_size);
 
-                // Fourth length
-                let puzzle = puzzle.reverse(5);
-                assert_eq!([3, 4, 2, 1, 0], puzzle.state.list.as_slice());
-                assert_eq!(1, puzzle.state.current_position);
-                assert_eq!(3, puzzle.state.skip_size);
+                    let puzzle = puzzle.increase();
+                    assert_eq!([4, 3, 0, 1, 2], puzzle.state.list.as_slice());
+                    assert_eq!(1, puzzle.state.current_position);
+                    assert_eq!(3, puzzle.state.skip_size);
 
-                let puzzle = puzzle.move_current_position();
-                assert_eq!([3, 4, 2, 1, 0], puzzle.state.list.as_slice());
-                assert_eq!(4, puzzle.state.current_position);
-                assert_eq!(3, puzzle.state.skip_size);
+                    // Fourth length
+                    let puzzle = puzzle.reverse(5);
+                    assert_eq!([3, 4, 2, 1, 0], puzzle.state.list.as_slice());
+                    assert_eq!(1, puzzle.state.current_position);
+                    assert_eq!(3, puzzle.state.skip_size);
 
-                let puzzle = puzzle.increase();
-                assert_eq!([3, 4, 2, 1, 0], puzzle.state.list.as_slice());
-                assert_eq!(4, puzzle.state.current_position);
-                assert_eq!(4, puzzle.state.skip_size);
+                    let puzzle = puzzle.move_current_position();
+                    assert_eq!([3, 4, 2, 1, 0], puzzle.state.list.as_slice());
+                    assert_eq!(4, puzzle.state.current_position);
+                    assert_eq!(3, puzzle.state.skip_size);
+
+                    let puzzle = puzzle.increase();
+                    assert_eq!([3, 4, 2, 1, 0], puzzle.state.list.as_slice());
+                    assert_eq!(4, puzzle.state.current_position);
+                    assert_eq!(4, puzzle.state.skip_size);
+                }
+
+                #[test]
+                fn example_01_steps_fn() {
+                    let puzzle = Puzzle::from_list_size(5);
+
+                    // Initial conditions
+                    assert_eq!([0, 1, 2, 3, 4], puzzle.state.list.as_slice());
+                    assert_eq!(0, puzzle.state.current_position);
+                    assert_eq!(0, puzzle.state.skip_size);
+
+                    // let lengths = [3, 4, 1, 5];
+                    let puzzle = puzzle.steps(3);
+                    assert_eq!([2, 1, 0, 3, 4], puzzle.state.list.as_slice());
+                    assert_eq!(3, puzzle.state.current_position);
+                    assert_eq!(1, puzzle.state.skip_size);
+
+                    let puzzle = puzzle.steps(4);
+                    assert_eq!([4, 3, 0, 1, 2], puzzle.state.list.as_slice());
+                    assert_eq!(3, puzzle.state.current_position);
+                    assert_eq!(2, puzzle.state.skip_size);
+
+                    let puzzle = puzzle.steps(1);
+                    assert_eq!([4, 3, 0, 1, 2], puzzle.state.list.as_slice());
+                    assert_eq!(1, puzzle.state.current_position);
+                    assert_eq!(3, puzzle.state.skip_size);
+
+                    let puzzle = puzzle.steps(5);
+                    assert_eq!([3, 4, 2, 1, 0], puzzle.state.list.as_slice());
+                    assert_eq!(4, puzzle.state.current_position);
+                    assert_eq!(4, puzzle.state.skip_size);
+                }
+
+                #[test]
+                fn example_01_slice() {
+                    let expected = 12;
+                    let input = [3, 4, 1, 5];
+                    let input_list_size = 5;
+                    let nb_run = 1;
+                    let to_check = aoc_day10_slice(&input, input_list_size, nb_run);
+
+                    assert_eq!(expected, to_check);
+                }
+
+                #[test]
+                fn example_01_solution() {
+                    let expected = 12;
+                    let input = "3,4,1,5";
+                    let input_list_size = 5;
+                    let to_check = part_1::aoc_day10(input, input_list_size);
+
+                    assert_eq!(expected, to_check);
+                }
+
+                #[test]
+                fn solution() {
+                    let expected = 826;
+                    let input_list_size = 256;
+                    let to_check = part_1::aoc_day10(PUZZLE_INPUT, input_list_size);
+
+                    assert_eq!(expected, to_check);
+                }
             }
 
-            #[test]
-            fn part_1_example_01_steps_fn() {
-                let puzzle = Puzzle::from_list_size(5);
+            mod part_2 {
+                use ::*;
+                use super::PUZZLE_INPUT;
 
-                // Initial conditions
-                assert_eq!([0, 1, 2, 3, 4], puzzle.state.list.as_slice());
-                assert_eq!(0, puzzle.state.current_position);
-                assert_eq!(0, puzzle.state.skip_size);
+                #[test]
+                fn example_01_empty_string() {
+                    let expected = "a2582a3a0e66e6e86e3812dcb672a272";
+                    let input = "";
+                    let input_list_size = 256;
+                    let to_check = part_2::aoc_day10(input, input_list_size);
 
-                // let lengths = [3, 4, 1, 5];
-                let puzzle = puzzle.steps(3);
-                assert_eq!([2, 1, 0, 3, 4], puzzle.state.list.as_slice());
-                assert_eq!(3, puzzle.state.current_position);
-                assert_eq!(1, puzzle.state.skip_size);
+                    assert_eq!(expected, to_check);
+                }
 
-                let puzzle = puzzle.steps(4);
-                assert_eq!([4, 3, 0, 1, 2], puzzle.state.list.as_slice());
-                assert_eq!(3, puzzle.state.current_position);
-                assert_eq!(2, puzzle.state.skip_size);
+                #[test]
+                fn example_02_aoc_2017() {
+                    let expected = "33efeb34ea91902bb2f59c9920caa6cd";
+                    let input = "AoC 2017";
+                    let input_list_size = 256;
+                    let to_check = part_2::aoc_day10(input, input_list_size);
 
-                let puzzle = puzzle.steps(1);
-                assert_eq!([4, 3, 0, 1, 2], puzzle.state.list.as_slice());
-                assert_eq!(1, puzzle.state.current_position);
-                assert_eq!(3, puzzle.state.skip_size);
+                    assert_eq!(expected, to_check);
+                }
 
-                let puzzle = puzzle.steps(5);
-                assert_eq!([3, 4, 2, 1, 0], puzzle.state.list.as_slice());
-                assert_eq!(4, puzzle.state.current_position);
-                assert_eq!(4, puzzle.state.skip_size);
-            }
+                #[test]
+                fn example_03_123() {
+                    let expected = "3efbe78a8d82f29979031a4aa0b16a9d";
+                    let input = "1,2,3";
+                    let input_list_size = 256;
+                    let to_check = part_2::aoc_day10(input, input_list_size);
 
-            #[test]
-            fn part_1_example_01_slice() {
-                let expected = 12;
-                let input = [3, 4, 1, 5];
-                let input_list_size = 5;
-                let nb_run = 1;
-                let to_check = aoc_day10_slice(&input, input_list_size, nb_run);
+                    assert_eq!(expected, to_check);
+                }
 
-                assert_eq!(expected, to_check);
-            }
+                #[test]
+                fn example_04_124() {
+                    let expected = "63960835bcdc130f0b66d7ff4f6a5a8e";
+                    let input = "1,2,4";
+                    let input_list_size = 256;
+                    let to_check = part_2::aoc_day10(input, input_list_size);
 
-            #[test]
-            fn part_1_example_01_solution() {
-                let expected = 12;
-                let input = "3,4,1,5";
-                let input_list_size = 5;
-                let to_check = aoc_day10(input, input_list_size);
+                    assert_eq!(expected, to_check);
+                }
 
-                assert_eq!(expected, to_check);
-            }
+                #[test]
+                fn solution() {
+                    let expected = "d067d3f14d07e09c2e7308c3926605c4";
+                    let input_list_size = 256;
+                    let to_check = part_2::aoc_day10(PUZZLE_INPUT, input_list_size);
 
-            #[test]
-            fn part_2_example_01_empty_string() {
-                let expected = "a2582a3a0e66e6e86e3812dcb672a272";
-                let input = "";
-                let input_list_size = 256;
-                let to_check = aoc_day10_part_2(input, input_list_size);
-
-                assert_eq!(expected, to_check);
-            }
-
-            #[test]
-            fn part_2_example_02_aoc_2017() {
-                let expected = "33efeb34ea91902bb2f59c9920caa6cd";
-                let input = "AoC 2017";
-                let input_list_size = 256;
-                let to_check = aoc_day10_part_2(input, input_list_size);
-
-                assert_eq!(expected, to_check);
-            }
-
-            #[test]
-            fn part_2_example_03_123() {
-                let expected = "3efbe78a8d82f29979031a4aa0b16a9d";
-                let input = "1,2,3";
-                let input_list_size = 256;
-                let to_check = aoc_day10_part_2(input, input_list_size);
-
-                assert_eq!(expected, to_check);
-            }
-
-            #[test]
-            fn part_2_example_04_124() {
-                let expected = "63960835bcdc130f0b66d7ff4f6a5a8e";
-                let input = "1,2,4";
-                let input_list_size = 256;
-                let to_check = aoc_day10_part_2(input, input_list_size);
-
-                assert_eq!(expected, to_check);
-            }
-
-            #[test]
-            fn part_1_solution() {
-                let expected = 826;
-                let input_list_size = 256;
-                let to_check = aoc_day10(PUZZLE_INPUT, input_list_size);
-
-                assert_eq!(expected, to_check);
-            }
-
-            #[test]
-            fn part_2_solution() {
-                let expected = "d067d3f14d07e09c2e7308c3926605c4";
-                let input_list_size = 256;
-                let to_check = aoc_day10_part_2(PUZZLE_INPUT, input_list_size);
-
-                assert_eq!(expected, to_check);
+                    assert_eq!(expected, to_check);
+                }
             }
         }
     }
