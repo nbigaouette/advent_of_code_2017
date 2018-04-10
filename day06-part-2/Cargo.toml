@@ -1,7 +1,0 @@
-[package]
-name = "day06_part_2"
-version = "0.1.0"
-authors = ["Nicolas Bigaouette <nbigaouette@gmail.com>"]
-
-[dependencies]
-crc = "1.7.0"
