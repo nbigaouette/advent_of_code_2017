@@ -60,42 +60,64 @@ pub struct Solution {
     pub part2: u64,
 }
 
-pub fn aoc_day12(input: &str) -> Solution {
-    let connections: HashMap<&str, Vec<&str>> = input
-        .trim()
-        .lines()
-        .map(|line| {
-            let mut s = line.split(" <-> ");
-            let pid = s.next().unwrap().trim();
-            let connected_to_those_pids = s.next().unwrap().split(", ").collect();
-            (pid, connected_to_those_pids)
-        })
-        .collect();
+struct Connections<'a> {
+    connections: HashMap<&'a str, HashSet<&'a str>>,
+    unvisited: HashMap<&'a str, HashSet<&'a str>>,
+    groups: HashMap<&'a str, HashSet<&'a str>>,
+}
 
-    let mut connected_to_pid_0 = HashSet::<&str>::new();
-    let mut to_visit = HashSet::<&str>::new();
-    connections["0"].iter().for_each(|pid| {
-        to_visit.insert(pid);
-    });
+impl<'a> Connections<'a> {
+    fn from_str(input: &'a str) -> Connections {
+        let connections: HashMap<&'a str, HashSet<&'a str>> = input
+            .trim()
+            .lines()
+            .map(|line| {
+                let mut s = line.split(" <-> ");
+                let pid = s.next().unwrap().trim();
+                let connected_to_those_pids = s.next().unwrap().split(", ").collect();
+                (pid, connected_to_those_pids)
+            })
+            .collect();
 
-    while to_visit.len() > 0 {
-        for pid in to_visit.iter() {
-            connected_to_pid_0.insert(pid);
+        Connections {
+            connections: connections.clone(),
+            unvisited: connections,
+            groups: HashMap::new(),
         }
+    }
 
-        let to_visit_new = to_visit.clone();
-        to_visit.clear();
-        for pid in to_visit_new.iter() {
-            for pid_to_insert in &connections[pid] {
-                if !connected_to_pid_0.contains(pid_to_insert) {
-                    to_visit.insert(pid_to_insert);
+    fn build_group_pid_0(&mut self) {
+        let mut to_visit = HashSet::<&str>::new();
+
+        self.unvisited.remove("0").unwrap().iter().for_each(|pid| {
+            to_visit.insert(pid);
+        });
+        self.groups.insert("0", HashSet::new());
+
+        while to_visit.len() > 0 {
+            for pid in to_visit.iter() {
+                self.groups.get_mut("0").unwrap().insert(pid);
+            }
+
+            let to_visit_new = to_visit.clone();
+            to_visit.clear();
+            for pid in to_visit_new.iter() {
+                for pid_to_insert in &self.connections[pid] {
+                    if !self.groups["0"].contains(pid_to_insert) {
+                        to_visit.insert(pid_to_insert);
+                    }
                 }
             }
         }
     }
+}
+
+pub fn aoc_day12(input: &str) -> Solution {
+    let mut connections = Connections::from_str(input);
+    connections.build_group_pid_0();
 
     Solution {
-        part1: connected_to_pid_0.len(),
+        part1: connections.groups["0"].len(),
         part2: 0,
     }
 }
