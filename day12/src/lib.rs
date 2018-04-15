@@ -52,29 +52,69 @@
 //!
 //!
 
+use std::collections::HashSet;
+use std::collections::HashMap;
+
 pub struct Solution {
-    pub part1: u64,
+    pub part1: usize,
     pub part2: u64,
 }
 
-pub fn aoc_day12(input: &str) -> Solution {}
+pub fn aoc_day12(input: &str) -> Solution {
+    let connections: HashMap<&str, Vec<&str>> = input
+        .trim()
+        .lines()
+        .map(|line| {
+            let mut s = line.split(" <-> ");
+            let pid = s.next().unwrap().trim();
+            let connected_to_those_pids = s.next().unwrap().split(", ").collect();
+            (pid, connected_to_those_pids)
+        })
+        .collect();
+
+    let mut connected_to_pid_0 = HashSet::<&str>::new();
+    let mut to_visit = HashSet::<&str>::new();
+    connections["0"].iter().for_each(|pid| {
+        to_visit.insert(pid);
+    });
+
+    while to_visit.len() > 0 {
+        for pid in to_visit.iter() {
+            connected_to_pid_0.insert(pid);
+        }
+
+        let to_visit_new = to_visit.clone();
+        to_visit.clear();
+        for pid in to_visit_new.iter() {
+            for pid_to_insert in &connections[pid] {
+                if !connected_to_pid_0.contains(pid_to_insert) {
+                    to_visit.insert(pid_to_insert);
+                }
+            }
+        }
+    }
+
+    Solution {
+        part1: connected_to_pid_0.len(),
+        part2: 0,
+    }
+}
 
 #[cfg(test)]
 mod tests {
     mod aoc2017 {
         mod day12 {
-            // const PUZZLE_INPUT: &'static str = include_str!("../input");
+            const PUZZLE_INPUT: &'static str = include_str!("../input");
 
             mod part1 {
 
-                /*
                 mod solution {
                     use ::*;
                     use super::super::PUZZLE_INPUT;
 
                     #[test]
                     fn solution() {
-                        let expected = 0;
+                        let expected = 152;
                         let Solution {
                             part1: to_check,
                             part2: _,
@@ -83,13 +123,12 @@ mod tests {
                         assert_eq!(expected, to_check);
                     }
                 }
-                */
 
                 mod given {
                     use ::*;
 
                     #[test]
-                    fn ex01_() {
+                    fn ex01() {
                         let expected = 6;
                         let input = "0 <-> 2
                                      1 <-> 1
