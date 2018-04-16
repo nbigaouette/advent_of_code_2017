@@ -65,23 +65,26 @@
 //!
 //!
 
+extern crate indexmap;
+
 use std::collections::HashSet;
-use std::collections::HashMap;
+
+use indexmap::IndexMap;
 
 pub struct Solution {
     pub part1: usize,
-    pub part2: u64,
+    pub part2: usize,
 }
 
 struct Connections<'a> {
-    connections: HashMap<&'a str, HashSet<&'a str>>,
-    unvisited: HashMap<&'a str, HashSet<&'a str>>,
-    groups: HashMap<&'a str, HashSet<&'a str>>,
+    connections: IndexMap<&'a str, HashSet<&'a str>>,
+    unvisited: IndexMap<&'a str, HashSet<&'a str>>,
+    groups: IndexMap<&'a str, HashSet<&'a str>>,
 }
 
 impl<'a> Connections<'a> {
     fn from_str(input: &'a str) -> Connections {
-        let connections: HashMap<&'a str, HashSet<&'a str>> = input
+        let connections: IndexMap<&'a str, HashSet<&'a str>> = input
             .trim()
             .lines()
             .map(|line| {
@@ -93,31 +96,36 @@ impl<'a> Connections<'a> {
             .collect();
 
         Connections {
-            connections: connections.clone(),
-            unvisited: connections,
-            groups: HashMap::new(),
+            unvisited: connections.clone(),
+            connections: connections,
+            groups: IndexMap::new(),
         }
     }
 
-    fn build_group_pid_0(&mut self) {
+    fn build_groups(&mut self) {
         let mut to_visit = HashSet::<&str>::new();
 
-        self.unvisited.remove("0").unwrap().iter().for_each(|pid| {
-            to_visit.insert(pid);
-        });
-        self.groups.insert("0", HashSet::new());
+        while self.unvisited.len() > 0 {
+            let (group_main_pid, connected_pids) = self.unvisited.swap_remove_index(0).unwrap();
 
-        while to_visit.len() > 0 {
-            for pid in to_visit.iter() {
-                self.groups.get_mut("0").unwrap().insert(pid);
-            }
+            connected_pids.iter().for_each(|pid| {
+                to_visit.insert(pid);
+            });
+            self.groups.insert(group_main_pid, HashSet::new());
 
-            let to_visit_new = to_visit.clone();
-            to_visit.clear();
-            for pid in to_visit_new.iter() {
-                for pid_to_insert in &self.connections[pid] {
-                    if !self.groups["0"].contains(pid_to_insert) {
-                        to_visit.insert(pid_to_insert);
+            while to_visit.len() > 0 {
+                for pid in to_visit.iter() {
+                    self.groups.get_mut(group_main_pid).unwrap().insert(pid);
+                }
+
+                let to_visit_new = to_visit.clone();
+                to_visit.clear();
+                for pid in to_visit_new.iter() {
+                    self.unvisited.remove(pid);
+                    for pid_to_insert in &self.connections[pid] {
+                        if !self.groups[group_main_pid].contains(pid_to_insert) {
+                            to_visit.insert(pid_to_insert);
+                        }
                     }
                 }
             }
@@ -127,11 +135,11 @@ impl<'a> Connections<'a> {
 
 pub fn aoc_day12(input: &str) -> Solution {
     let mut connections = Connections::from_str(input);
-    connections.build_group_pid_0();
+    connections.build_groups();
 
     Solution {
         part1: connections.groups["0"].len(),
-        part2: 0,
+        part2: connections.groups.len(),
     }
 }
 
@@ -188,7 +196,6 @@ mod tests {
                 */
             }
 
-            /*
             mod part2 {
                 mod solution {
                     use ::*;
@@ -196,7 +203,7 @@ mod tests {
 
                     #[test]
                     fn solution() {
-                        let expected = 0;
+                        let expected = 186;
                         let Solution {
                             part1: _,
                             part2: to_check,
@@ -208,13 +215,32 @@ mod tests {
 
                 mod given {
                     use ::*;
+
+                    #[test]
+                    fn ex01() {
+                        let expected = 2;
+                        let input = "0 <-> 2
+                                     1 <-> 1
+                                     2 <-> 0, 3, 4
+                                     3 <-> 2, 4
+                                     4 <-> 2, 3, 6
+                                     5 <-> 6
+                                     6 <-> 4, 5";
+                        let Solution {
+                            part1: _,
+                            part2: to_check,
+                        } = aoc_day12(input);
+
+                        assert_eq!(expected, to_check);
+                    }
                 }
 
+                /*
                 mod extra {
                     use ::*;
                 }
+                */
             }
-            */
         }
     }
 }
