@@ -74,6 +74,13 @@ name = "day11"
 version = "0.1.0"
 
 [[package]]
+name = "day12"
+version = "0.1.0"
+dependencies = [
+ "indexmap 1.0.1 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
 name = "indexmap"
 version = "1.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
