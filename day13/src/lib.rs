@@ -326,6 +326,7 @@ extern crate pretty_assertions;
 #[cfg(test)]
 #[macro_use]
 extern crate indoc;
+extern crate rayon;
 
 pub mod firewall {
     use std;
@@ -570,9 +571,12 @@ pub mod part1 {
 pub mod part2 {
     use *;
 
+    use rayon::iter::{IntoParallelIterator, ParallelIterator};
+
     pub fn aoc_day13(input: &str) -> usize {
-        let part2_min_delay = (0..)
-            .find(|&delay| {
+        let part2_min_delay = (0_usize..10_000_000)
+            .into_par_iter()
+            .find_first(|&delay| {
                 let mut hopper = FirewallHopper::with_delay(input, delay);
                 // println!("******************************************************");
                 println!("delay: {}", delay);
