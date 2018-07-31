@@ -1,0 +1,10 @@
+[package]
+name = "day13"
+version = "0.1.0"
+authors = ["Nicolas Bigaouette <nbigaouette@gmail.com>"]
+
+[dependencies]
+pretty_assertions = "0.5.1"
+
+[dev-dependencies]
+indoc = "0.2"
