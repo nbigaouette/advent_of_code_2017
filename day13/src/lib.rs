@@ -461,42 +461,24 @@ impl FirewallHopper {
     }
 
     pub fn step(&mut self) {
-        // println!("step() ----------------------------------");
         // Reset flag
-        // self.step_severity = 0;
         self.got_caught = false;
 
         // Step 1: Packet move
         self.packet_location += 1;
-        // println!("    After self move");
-        // println!("{}", self.to_string());
 
         // Check detection
         self.step_severity = self.calculate_step_severity();
-        // println!("---> step_severity: {}", self.step_severity);
 
         // Step 2: Scanners move
         self.fw.step();
-        // println!("    After scanners move");
-        // println!("{}", self.to_string());
     }
 
     fn will_get_caught(&mut self) -> bool {
-        // let mut done = false;
-        // for severity in &self {}
-        // let got_caught: Option<bool> = self.find(|_severity| {
-        //     self.got_caught
-        // });
-        // let mut i = 0;
         while let Some(_severity) = self.next() {
             if self.got_caught {
-                // println!("GOT CAUGHT!!!!!!!!!!!!!!");
                 return true;
             }
-            // i += 1;
-            // if i > 17 {
-            //     panic!();
-            // }
         }
 
         return false;
@@ -513,7 +495,6 @@ impl FirewallHopper {
             } else {
                 if self.fw.layers[i].depth > 0 && self.fw.layers[i].loc == 0 {
                     // If scanner is at top location where the packet is...
-                    // println!("calculate_step_severity() - GOT CAUGHT!!!!!!!!!!!!!!");
                     self.got_caught = true;
                     self.fw.layers[i].depth * i
                 } else {
@@ -578,14 +559,9 @@ pub mod part2 {
             .into_par_iter()
             .find_first(|&delay| {
                 let mut hopper = FirewallHopper::with_delay(input, delay);
-                // println!("******************************************************");
-                println!("delay: {}", delay);
-                // println!("{}", hopper.to_string());
                 !hopper.will_get_caught()
             })
             .unwrap();
-        println!("part2_min_delay: {}", part2_min_delay);
-        println!("#####################################################");
 
         part2_min_delay
     }
