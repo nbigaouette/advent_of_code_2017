@@ -787,12 +787,20 @@ mod tests {
                     use *;
 
                     #[test]
+                    #[ignore]
                     fn solution() {
+                        // WARNING: This took 22 hours running in parallel on a
+                        //          the 32 cores of an Intel(R) Xeon(R) CPU E5-2670 0 @ 2.60GHz
+                        //          system.
+                        //              real    1315m22.269s
+                        //              user    42094m35.065s
+                        //              sys     1m10.126s
+                        //          As such, the test is not run automatically
+                        //          (it's marked `#[ignore]`).
                         let expected = 3823370;
                         let to_check = part2::aoc_day13(PUZZLE_INPUT);
 
                         assert_eq!(expected, to_check);
-                        // panic!("part2::aoc_day13() never finishes...");
                     }
                 }
 
