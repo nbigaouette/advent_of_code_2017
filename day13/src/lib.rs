@@ -788,7 +788,7 @@ mod tests {
 
                     #[test]
                     fn solution() {
-                        let expected = 0;
+                        let expected = 3823370;
                         let to_check = part2::aoc_day13(PUZZLE_INPUT);
 
                         assert_eq!(expected, to_check);
