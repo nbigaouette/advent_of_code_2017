@@ -474,6 +474,7 @@ impl FirewallHopper {
         self.fw.step();
     }
 
+    #[allow(dead_code)]
     fn will_get_caught_slow(&mut self) -> bool {
         while let Some(_severity) = self.next() {
             if self.got_caught {
@@ -577,13 +578,51 @@ pub mod part2 {
 
     // use rayon::iter::{IntoParallelIterator, ParallelIterator};
 
-    pub fn aoc_day13(input: &str) -> usize {
+    pub fn aoc_day13_slow(input: &str) -> usize {
         let part2_min_delay = (0_usize..10_000_000)
             // .into_par_iter()
             // .find_first(|&delay| {
             .find(|&delay| {
                 let mut hopper = FirewallHopper::with_delay(input, delay);
                 !hopper.will_get_caught()
+            })
+            .unwrap();
+
+        part2_min_delay
+    }
+
+    pub fn aoc_day13(input: &str) -> usize {
+        // Initialize a dummy hopper, just to get the layers.
+        // This is mainly done to parse the string once.
+        let hopper = FirewallHopper::with_delay(input, 0);
+        let layers = hopper.fw.layers;
+
+        let part2_min_delay = (0_usize..10_000_000)
+            .find(|&delay| {
+                // Time when packet enters the firewall
+                let t0 = delay;
+                // Time the packet leaves the firewall
+                let t1 = delay + layers.len() + 1;
+                // Does the packet gets caught between t0 and t1?
+                let mut got_caught = false;
+                for i in t0..=t1 {
+                    let packet_location = i - delay;
+                    if packet_location == layers.len() {
+                        // Packet exited firewall, success!
+                        got_caught = false;
+                        break;
+                    }
+                    if layers[packet_location].depth == 0 {
+                        continue;
+                    }
+                    if i % (2 * layers[packet_location].depth - 2) == 0 {
+                        // Scanner is back to its initial position when packet is there!
+                        got_caught = true;
+                        break;
+                    }
+                }
+
+                !got_caught
             })
             .unwrap();
 
