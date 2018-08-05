@@ -326,7 +326,7 @@ extern crate pretty_assertions;
 #[cfg(test)]
 #[macro_use]
 extern crate indoc;
-extern crate rayon;
+// extern crate rayon;
 
 pub mod firewall {
     use std;
@@ -474,14 +474,37 @@ impl FirewallHopper {
         self.fw.step();
     }
 
-    fn will_get_caught(&mut self) -> bool {
+    fn will_get_caught_slow(&mut self) -> bool {
         while let Some(_severity) = self.next() {
             if self.got_caught {
                 return true;
             }
         }
-
         return false;
+    }
+
+    fn will_get_caught(&mut self) -> bool {
+        let layers = &self.fw.layers;
+        let delay = (-self.packet_location) as usize;
+        // Time when packet enters the firewall
+        let t0 = delay;
+        // Time the packet leaves the firewall
+        let t1 = delay + layers.len() + 1;
+        // Does the packet gets caught between t0 and t1?
+        for i in t0..=t1 {
+            let packet_location = i - delay;
+            if packet_location == layers.len() {
+                break;
+            }
+            if layers[packet_location].depth == 0 {
+                continue;
+            }
+            if i % (2 * layers[packet_location].depth - 2) == 0 {
+                // Scanner is back to its initial position when packet is there!
+                return true;
+            }
+        }
+        false
     }
 
     fn calculate_step_severity(&mut self) -> usize {
@@ -552,12 +575,13 @@ pub mod part1 {
 pub mod part2 {
     use *;
 
-    use rayon::iter::{IntoParallelIterator, ParallelIterator};
+    // use rayon::iter::{IntoParallelIterator, ParallelIterator};
 
     pub fn aoc_day13(input: &str) -> usize {
         let part2_min_delay = (0_usize..10_000_000)
-            .into_par_iter()
-            .find_first(|&delay| {
+            // .into_par_iter()
+            // .find_first(|&delay| {
+            .find(|&delay| {
                 let mut hopper = FirewallHopper::with_delay(input, delay);
                 !hopper.will_get_caught()
             })
@@ -763,7 +787,7 @@ mod tests {
                     use *;
 
                     #[test]
-                    #[ignore]
+                    // #[ignore]
                     fn solution() {
                         // WARNING: This took 22 hours running in parallel on a
                         //          the 32 cores of an Intel(R) Xeon(R) CPU E5-2670 0 @ 2.60GHz
